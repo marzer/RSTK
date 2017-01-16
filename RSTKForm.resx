@@ -117,10 +117,160 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="pbEmulatedFullscreen.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        xAAADsQBlSsOGwAAAcFJREFUSEvNlL9Kw1AUxkPpJA4+gYOIs5ODiIM4+AgOIiIOjuLsIk5SfABxEgen
+        4uATFJEiIg6SpSWUIB1Kmg4lbZImbf1OPMHba/60aQU/+A2559xzTu79uMq/kuu6B+CEP2cry7JWBoOB
+        B4bdbneDl2ejcrmc8zzvkYoTvu+/apqW5/D0sm17OywegqPa5/B00nU9j4k/5Ab9fr/ebDbnOS27MOnx
+        MEa9Xu+C07LJNM0FTGrI0wvY7XZ7kdMnFyYsCMWKGHqHQNObcB2Xf8/pkwm2XEYBNywEChxScCenwjrZ
+        dp1D4wuTPQQHzZIb8HIgfL+oqprjcLow0ZY4IRP7B4TjOHscTlalUiFbvssFQGID3MunYRjptoUtj+TN
+        TGIDAqY455RotVotsmWDj3ZEKBB7B6Gwt5NoW0xwKU8lcIsaqwQKXUXEA2COOy43KthyCQmiLTMDk6xx
+        2W+VSiV6LYtRyQIapqcXlVCF9V/gCJ+r1eqPbdFxkwJJQjz1DkTBtrtBcq1WI1u+iRPEkOoiEdyTDtvO
+        kS0PoxJksMGECVQCDRpROTLIPVOwsR4VnAVkW/qDa3R6+iOyvbTjS1G+ABH3f404omz7AAAAAElFTkSu
+        QmCC
+</value>
+  </data>
+  <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>123, 11</value>
+  </metadata>
+  <data name="pbEmulatedFullscreen.ToolTip" xml:space="preserve">
+    <value>Recommended setting: Off (unless... see below).
+
+On newer PC's (particularly those with Windows 10), Rocksmith appears to have
+difficulty managing the device state changes when attempting to enter fullscreen mode,
+variously causing system freezes, black screens, BSOD's, etc. RSTK's "Emulated Fullscreen"
+is an alternative that can 'fake' fullscreen for you by stripping the window frames off of
+the Rocksmith window and making it a Top-Most window. This process can only work
+when Fullscreen mode is set to Windowed.
+
+Major caveat, though: The size of the window will be exactly the size of the Resolution
+setting, because Rocksmith doesn't respond well to having it's window resized much beyond
+that. If you have a low-spec PC with a very high-resolution display, you may find this leads to some
+serious performance issues.
+</value>
+  </data>
+  <data name="pbExclusiveMode.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        xAAADsQBlSsOGwAAAcFJREFUSEvNlL9Kw1AUxkPpJA4+gYOIs5ODiIM4+AgOIiIOjuLsIk5SfABxEgen
+        4uATFJEiIg6SpSWUIB1Kmg4lbZImbf1OPMHba/60aQU/+A2559xzTu79uMq/kuu6B+CEP2cry7JWBoOB
+        B4bdbneDl2ejcrmc8zzvkYoTvu+/apqW5/D0sm17OywegqPa5/B00nU9j4k/5Ab9fr/ebDbnOS27MOnx
+        MEa9Xu+C07LJNM0FTGrI0wvY7XZ7kdMnFyYsCMWKGHqHQNObcB2Xf8/pkwm2XEYBNywEChxScCenwjrZ
+        dp1D4wuTPQQHzZIb8HIgfL+oqprjcLow0ZY4IRP7B4TjOHscTlalUiFbvssFQGID3MunYRjptoUtj+TN
+        TGIDAqY455RotVotsmWDj3ZEKBB7B6Gwt5NoW0xwKU8lcIsaqwQKXUXEA2COOy43KthyCQmiLTMDk6xx
+        2W+VSiV6LYtRyQIapqcXlVCF9V/gCJ+r1eqPbdFxkwJJQjz1DkTBtrtBcq1WI1u+iRPEkOoiEdyTDtvO
+        kS0PoxJksMGECVQCDRpROTLIPVOwsR4VnAVkW/qDa3R6+iOyvbTjS1G+ABH3f404omz7AAAAAElFTkSu
+        QmCC
+</value>
+  </data>
+  <data name="pbExclusiveMode.ToolTip" xml:space="preserve">
+    <value>Recommended setting: On
+
+Disable this if you want to have other audio programs running at the same time as Rocksmith 2014.
+You may need to increase your Latency buffer setting to avoid audio issues if you choose to disable Exclusive Mode. </value>
+  </data>
+  <data name="pbUltraLowLatency.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        xAAADsQBlSsOGwAAAcFJREFUSEvNlL9Kw1AUxkPpJA4+gYOIs5ODiIM4+AgOIiIOjuLsIk5SfABxEgen
+        4uATFJEiIg6SpSWUIB1Kmg4lbZImbf1OPMHba/60aQU/+A2559xzTu79uMq/kuu6B+CEP2cry7JWBoOB
+        B4bdbneDl2ejcrmc8zzvkYoTvu+/apqW5/D0sm17OywegqPa5/B00nU9j4k/5Ab9fr/ebDbnOS27MOnx
+        MEa9Xu+C07LJNM0FTGrI0wvY7XZ7kdMnFyYsCMWKGHqHQNObcB2Xf8/pkwm2XEYBNywEChxScCenwjrZ
+        dp1D4wuTPQQHzZIb8HIgfL+oqprjcLow0ZY4IRP7B4TjOHscTlalUiFbvssFQGID3MunYRjptoUtj+TN
+        TGIDAqY455RotVotsmWDj3ZEKBB7B6Gwt5NoW0xwKU8lcIsaqwQKXUXEA2COOy43KthyCQmiLTMDk6xx
+        2W+VSiV6LYtRyQIapqcXlVCF9V/gCJ+r1eqPbdFxkwJJQjz1DkTBtrtBcq1WI1u+iRPEkOoiEdyTDtvO
+        kS0PoxJksMGECVQCDRpROTLIPVOwsR4VnAVkW/qDa3R6+iOyvbTjS1G+ABH3f404omz7AAAAAElFTkSu
+        QmCC
+</value>
+  </data>
+  <data name="pbUltraLowLatency.ToolTip" xml:space="preserve">
+    <value>Recommended setting: On
+
+Disable this if you’re having trouble getting the game to have good audio performance.
+This will drop the game back to the original Rocksmith audio settings and may resolve
+some audio crackling issues at the cost of some of the Rocksmith 2014 latency improvements.</value>
+  </data>
+  <data name="pbMaxOutputBufferSize.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        xAAADsQBlSsOGwAAAcFJREFUSEvNlL9Kw1AUxkPpJA4+gYOIs5ODiIM4+AgOIiIOjuLsIk5SfABxEgen
+        4uATFJEiIg6SpSWUIB1Kmg4lbZImbf1OPMHba/60aQU/+A2559xzTu79uMq/kuu6B+CEP2cry7JWBoOB
+        B4bdbneDl2ejcrmc8zzvkYoTvu+/apqW5/D0sm17OywegqPa5/B00nU9j4k/5Ab9fr/ebDbnOS27MOnx
+        MEa9Xu+C07LJNM0FTGrI0wvY7XZ7kdMnFyYsCMWKGHqHQNObcB2Xf8/pkwm2XEYBNywEChxScCenwjrZ
+        dp1D4wuTPQQHzZIb8HIgfL+oqprjcLow0ZY4IRP7B4TjOHscTlalUiFbvssFQGID3MunYRjptoUtj+TN
+        TGIDAqY455RotVotsmWDj3ZEKBB7B6Gwt5NoW0xwKU8lcIsaqwQKXUXEA2COOy43KthyCQmiLTMDk6xx
+        2W+VSiV6LYtRyQIapqcXlVCF9V/gCJ+r1eqPbdFxkwJJQjz1DkTBtrtBcq1WI1u+iRPEkOoiEdyTDtvO
+        kS0PoxJksMGECVQCDRpROTLIPVOwsR4VnAVkW/qDa3R6+iOyvbTjS1G+ABH3f404omz7AAAAAElFTkSu
+        QmCC
+</value>
+  </data>
+  <data name="pbMaxOutputBufferSize.ToolTip" xml:space="preserve">
+    <value>Recommended setting:
+100-150 for a very powerful PC;
+250-400 for a moderately powerful PC;
+0 otherwise (Rocksmith decides- typically defaults to 1024).
+
+Determines the length of the sound device's output buffer; the larger the buffer, the
+longer it takes to fill (and the more latency is introduced into the gameplay).
+
+Going too high will lead to a severely diminished gameplay experience; going lower than what
+your CPU speed and memory bandwidth are capable of handling will lead to audio artefacts
+(clicks, pops, skipping, etc.).</value>
+  </data>
+  <data name="pbLatencyBuffer.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        xAAADsQBlSsOGwAAAcFJREFUSEvNlL9Kw1AUxkPpJA4+gYOIs5ODiIM4+AgOIiIOjuLsIk5SfABxEgen
+        4uATFJEiIg6SpSWUIB1Kmg4lbZImbf1OPMHba/60aQU/+A2559xzTu79uMq/kuu6B+CEP2cry7JWBoOB
+        B4bdbneDl2ejcrmc8zzvkYoTvu+/apqW5/D0sm17OywegqPa5/B00nU9j4k/5Ab9fr/ebDbnOS27MOnx
+        MEa9Xu+C07LJNM0FTGrI0wvY7XZ7kdMnFyYsCMWKGHqHQNObcB2Xf8/pkwm2XEYBNywEChxScCenwjrZ
+        dp1D4wuTPQQHzZIb8HIgfL+oqprjcLow0ZY4IRP7B4TjOHscTlalUiFbvssFQGID3MunYRjptoUtj+TN
+        TGIDAqY455RotVotsmWDj3ZEKBB7B6Gwt5NoW0xwKU8lcIsaqwQKXUXEA2COOy43KthyCQmiLTMDk6xx
+        2W+VSiV6LYtRyQIapqcXlVCF9V/gCJ+r1eqPbdFxkwJJQjz1DkTBtrtBcq1WI1u+iRPEkOoiEdyTDtvO
+        kS0PoxJksMGECVQCDRpROTLIPVOwsR4VnAVkW/qDa3R6+iOyvbTjS1G+ABH3f404omz7AAAAAElFTkSu
+        QmCC
+</value>
+  </data>
+  <data name="pbLatencyBuffer.ToolTip" xml:space="preserve">
+    <value>Recommended setting:
+1 for a very powerful PC;
+2 for a moderately powerful PC;
+4 otherwise.
+
+Determines the number of latency buffers Rocksmith uses in processing audio streams. The higher the number,
+the longer they take to fill (and the more latency is introduced into the gameplay).
+
+Going too high will lead to a severely diminished gameplay experience; going lower than what
+your CPU speed and memory bandwidth are capable of handling will lead to audio artefacts
+(clicks, pops, skipping, etc.).</value>
+  </data>
+  <data name="pbEffectiveLatency.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        xAAADsQBlSsOGwAAAcFJREFUSEvNlL9Kw1AUxkPpJA4+gYOIs5ODiIM4+AgOIiIOjuLsIk5SfABxEgen
+        4uATFJEiIg6SpSWUIB1Kmg4lbZImbf1OPMHba/60aQU/+A2559xzTu79uMq/kuu6B+CEP2cry7JWBoOB
+        B4bdbneDl2ejcrmc8zzvkYoTvu+/apqW5/D0sm17OywegqPa5/B00nU9j4k/5Ab9fr/ebDbnOS27MOnx
+        MEa9Xu+C07LJNM0FTGrI0wvY7XZ7kdMnFyYsCMWKGHqHQNObcB2Xf8/pkwm2XEYBNywEChxScCenwjrZ
+        dp1D4wuTPQQHzZIb8HIgfL+oqprjcLow0ZY4IRP7B4TjOHscTlalUiFbvssFQGID3MunYRjptoUtj+TN
+        TGIDAqY455RotVotsmWDj3ZEKBB7B6Gwt5NoW0xwKU8lcIsaqwQKXUXEA2COOy43KthyCQmiLTMDk6xx
+        2W+VSiV6LYtRyQIapqcXlVCF9V/gCJ+r1eqPbdFxkwJJQjz1DkTBtrtBcq1WI1u+iRPEkOoiEdyTDtvO
+        kS0PoxJksMGECVQCDRpROTLIPVOwsR4VnAVkW/qDa3R6+iOyvbTjS1G+ABH3f404omz7AAAAAElFTkSu
+        QmCC
+</value>
+  </data>
+  <data name="pbEffectiveLatency.ToolTip" xml:space="preserve">
+    <value>Recommended value: 20-60ms
+
+Tweak Estimated Latency by adjusting the values for Latency buffer and Max output buffer size.
+Going too high will lead to a severely diminished gameplay experience; going lower than what your CPU speed and memory
+bandwidth are capable of handling will lead to audio artefacts (clicks, pops, skipping, etc.).</value>
+  </data>
   <metadata name="dlgBrowse.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>25</value>
+    <value>47</value>
   </metadata>
 </root>
