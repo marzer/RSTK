@@ -414,6 +414,8 @@ namespace RSTK
             }
         }
 
+        private volatile int highFrequencyPollSeconds = 0;
+
         /////////////////////////////////////////////////////////////////////
         // CONSTRUCTION/INITIALIZATION/DESTRUCTION
         /////////////////////////////////////////////////////////////////////
@@ -463,11 +465,17 @@ namespace RSTK
 
                     //if no process, sleep for another 4 seconds
                     //(so we only poll every 5 seconds when no game is running)
-                    if (GameProcess == null)
+                    //...unless highFrequencyPollSeconds is > 0;
+                    if (process == null)
                     {
-                        ThreadExtensions.Sleep(4000, () => disposed);
-                        if (disposed)
-                            break;
+                        if (highFrequencyPollSeconds > 0)
+                            --highFrequencyPollSeconds;
+                        else
+                        {
+                            ThreadExtensions.Sleep(4000, () => disposed);
+                            if (disposed)
+                                break;
+                        }
                         continue;
                     }
 
@@ -540,7 +548,10 @@ namespace RSTK
                 }
             }
             if (GameProcess != null)
+            {
+                highFrequencyPollSeconds = 0;
                 return;
+            }
 
             //get all processes
             var processes = Process.GetProcesses();
@@ -645,6 +656,18 @@ namespace RSTK
             parser.WriteFile(ConfigPath, ini, System.Text.Encoding.UTF8);
         }
 
+
+        /////////////////////////////////////////////////////////////////////
+        // HIGH FREQUENCY POLL WINDOW
+        /////////////////////////////////////////////////////////////////////
+
+        public void SetFastPollWindow(uint sec)
+        {
+            this.DisposeCheck();
+            if (process != null)
+                return;
+            highFrequencyPollSeconds = (int)Math.Min(sec, 10);
+        }
 
         /////////////////////////////////////////////////////////////////////
         // DISPOSE
