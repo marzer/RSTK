@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
@@ -46,10 +47,7 @@ namespace RSTK
         /// <summary>
         /// Has this wrapper object been disposed?
         /// </summary>
-        public bool IsDisposed
-        {
-            get { return disposed; }
-        }
+        public bool IsDisposed => disposed;
         private volatile bool disposed = false;
 
         /// <summary>
@@ -85,10 +83,7 @@ namespace RSTK
         /// <summary>
         /// Command to run this version of rocksmith via Steam.
         /// </summary>
-        public string SteamRunCommand
-        {
-            get { return string.Format("steam://run/{0}", AppID); }
-        }
+        public string SteamRunCommand => string.Format("steam://run/{0}", AppID);
 
         private Thread thread = null;
         private readonly object threadLock = new object();
@@ -310,16 +305,27 @@ namespace RSTK
         private bool enableMicrophone = true;
 
         /// <summary>
+        /// Rocksmith.ini DumpAudioLog
+        /// default: false
+        /// </summary>
+        public bool DumpAudioLog
+        {
+            get { return dumpAudioLog; }
+            set
+            {
+                this.DisposeCheck();
+                dumpAudioLog = value;
+            }
+        }
+        private bool dumpAudioLog = false;
+
+        /// <summary>
         /// Gets/sets the window styles of the rocksmith window.
         /// </summary>
         private WindowStyles WindowStyles
         {
             get { return process.MainWindowHandle.GetStyles(); }
-            set
-            {
-                if (value != WindowStyles)
-                    process.MainWindowHandle.SetStyles(value);
-            }
+            set { process.MainWindowHandle.SetStyles(value); }
         }
 
         /// <summary>
@@ -328,11 +334,7 @@ namespace RSTK
         private WindowStylesEx WindowStylesEx
         {
             get { return process.MainWindowHandle.GetStylesEx(); }
-            set
-            {
-                if (value != WindowStylesEx)
-                    process.MainWindowHandle.SetStylesEx(value);
-            }
+            set { process.MainWindowHandle.SetStylesEx(value); }
         }
 
         /// <summary>
@@ -415,6 +417,7 @@ namespace RSTK
         }
 
         private volatile int highFrequencyPollSeconds = 0;
+        private readonly FileSystemWatcher directoryWatcher;
 
         /////////////////////////////////////////////////////////////////////
         // CONSTRUCTION/INITIALIZATION/DESTRUCTION
@@ -440,6 +443,15 @@ namespace RSTK
             //read intial config from ini file (or load defaults)
             ReadConfig();
 
+            //create watcher to monitor for external config changes (by the game)
+            directoryWatcher = new FileSystemWatcher(GameDirectory, "Rocksmith.ini");
+            directoryWatcher.IncludeSubdirectories = false;
+            directoryWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+            directoryWatcher.Created += ConfigChanged;
+            directoryWatcher.Changed += ConfigChanged;
+            directoryWatcher.Deleted += ConfigChanged;
+            directoryWatcher.EnableRaisingEvents = true;
+
             //launch monitoring thread
             thread = new Thread(() =>
             {
@@ -448,9 +460,6 @@ namespace RSTK
                 Thread.Sleep(250);
                 if (disposed)
                     return;
-
-                //check if a game instance is active first
-                RefreshProcess();
 
                 //poll
                 while (!disposed)
@@ -461,12 +470,14 @@ namespace RSTK
                         break;
 
                     //refresh process
+                    bool wasRunning = process != null;
                     RefreshProcess();
+                    bool running = process != null;
 
                     //if no process, sleep for another 4 seconds
                     //(so we only poll every 5 seconds when no game is running)
                     //...unless highFrequencyPollSeconds is > 0;
-                    if (process == null)
+                    if (!running)
                     {
                         if (highFrequencyPollSeconds > 0)
                             --highFrequencyPollSeconds;
@@ -476,11 +487,16 @@ namespace RSTK
                             if (disposed)
                                 break;
                         }
+
+                        //if the game just exited, refresh config one last time
+                        //if (wasRunning)
+                          //  ReadConfig();
+
                         continue;
                     }
 
-                    //refresh ini
-                    ReadConfig();
+                    //refresh ini if the game was just launched
+                    //ReadConfig();
 
                     //emulated fullscreen
                     if (fullscreenMode == FullscreenModes.Windowed)
@@ -537,14 +553,14 @@ namespace RSTK
         private void RefreshProcess()
         {
             //refresh existing process
-            if (GameProcess != null)
+            if (process != null)
             {
-                if (!GameProcess.HasExited)
-                    GameProcess.Refresh();
-                if (GameProcess.HasExited)
+                if (!process.HasExited)
+                    process.Refresh();
+                if (process.HasExited)
                 {
                     Logger.I("Rocksmith[{0}] has exited.", GameProcess.Id);
-                    GameProcess = null;
+                    GameProcess = null; //fires events
                 }
             }
             if (GameProcess != null)
@@ -553,9 +569,11 @@ namespace RSTK
                 return;
             }
 
-            //get all processes
-            var processes = Process.GetProcesses();
-            if (processes.Count() == 0)
+            //get processes
+            var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(GamePath));
+            //var processes = Process.GetProcesses();
+            //if (processes.Count() == 0)
+            if (processes.Length == 0)
             {
                 GameProcess = null;
                 return;
@@ -565,10 +583,9 @@ namespace RSTK
             var path = GamePath.ToLower();
             GameProcess = processes.Where((p) =>
             {
-                try { 
-                    return p != null
-                    && p.Id != 0
-                    && p.MainWindowHandle != IntPtr.Zero
+                try
+                { 
+                    return p.MainWindowHandle != IntPtr.Zero
                     && !p.HasExited
                     && p.MainModule != null
                     && p.MainModule.FileName.ToLower().Equals(path);
@@ -586,20 +603,30 @@ namespace RSTK
         /////////////////////////////////////////////////////////////////////
 
         /// <summary>
+        /// Event handler for detecting config file changes made when the game is running.
+        /// </summary>
+        private void ConfigChanged(object watcher, FileSystemEventArgs e)
+        {
+            if (process == null)
+                return;
+            ReadConfig();
+        }
+
+        /// <summary>
         /// Reads rocksmith.ini and updates config values accordingly.
         /// </summary>
         private void ReadConfig()
         {
             if (File.Exists(ConfigPath))
             {
-                var parser = new FileIniDataParser();
-                var ini = parser.ReadFile(ConfigPath, ConfigPath.DetectEncoding());
+                var ini = ConfigPath.TryReadIniFile();
 
                 enableMicrophone = ini.ReadBool("Audio", "EnableMicrophone", true);
+                dumpAudioLog = ini.ReadBool("Audio", "DumpAudioLog", false);
                 exclusive = ini.ReadBool("Audio", "ExclusiveMode", true);
                 latencyBuffer = ini.ReadUint("Audio", "LatencyBuffer", 4);
                 maxOutputBufferSize = ini.ReadUint("Audio", "MaxOutputBufferSize", 0);
-                win32LowLatency = ini.ReadBool("Audio", "MaxOutputBufferSize", true);
+                win32LowLatency = ini.ReadBool("Audio", "Win32UltraLowLatencyMode", true);
                 fullscreenMode = (FullscreenModes)ini.ReadUint("Renderer.Win32", "Fullscreen",
                     (uint)FullscreenModes.ExclusiveFullscreen);
                 resolution = new Size(
@@ -611,6 +638,7 @@ namespace RSTK
             else
             {
                 enableMicrophone = true;
+                dumpAudioLog = false;
                 exclusive = true;
                 latencyBuffer = 4;
                 maxOutputBufferSize = 0;
@@ -618,6 +646,9 @@ namespace RSTK
                 fullscreenMode = FullscreenModes.ExclusiveFullscreen;
                 resolution = new Size(1280, 720);
             }
+#if DEBUG
+            Logger.V("Rocksmith.ini read.");
+#endif
             ConfigRead?.Invoke(this);
         }
 
@@ -633,6 +664,7 @@ namespace RSTK
             ini.Configuration.AssigmentSpacer = "";
             ini.Sections.AddSection("Audio");
             ini["Audio"]["EnableMicrophone"] = enableMicrophone ? "1" : "0";
+            ini["Audio"]["DumpAudioLog"] = dumpAudioLog ? "1" : "0";
             ini["Audio"]["ExclusiveMode"] = exclusive ? "1" : "0";
             ini["Audio"]["LatencyBuffer"] = latencyBuffer.ToString();
             ini["Audio"]["MaxOutputBufferSize"] = maxOutputBufferSize.ToString();
@@ -643,17 +675,17 @@ namespace RSTK
             ini["Renderer.Win32"]["ScreenHeight"] = resolution.Height.ToString();
 
             //merge with existing ini if it exists
-            var parser = new FileIniDataParser();
             if (File.Exists(ConfigPath))
             {
-                var existing = parser.ReadFile(ConfigPath, ConfigPath.DetectEncoding());
+                var existing = ConfigPath.TryReadIniFile();
                 existing.Merge(ini);
                 ini = existing;
                 ini.Configuration.AssigmentSpacer = "";
             }
 
             //write to disk
-            parser.WriteFile(ConfigPath, ini, System.Text.Encoding.UTF8);
+            var parser = new FileIniDataParser();
+            parser.WriteFile(ConfigPath, ini, Encoding.GetEncoding(1252));//new UTF8Encoding(false));
         }
 
 
@@ -678,8 +710,8 @@ namespace RSTK
             disposed = true;
             if (thread != null)
                 thread.Join();
-            if (process != null)
-                process.Dispose();
+            GameProcess = null;
+            directoryWatcher.Dispose();
             Running = null;
             Terminated = null;
             ConfigRead = null;
