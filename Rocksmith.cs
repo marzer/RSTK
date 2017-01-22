@@ -3,13 +3,11 @@ using IniParser.Model;
 using Marzersoft;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using static Marzersoft.Native;
@@ -416,7 +414,7 @@ namespace RSTK
             }
         }
 
-        private volatile int highFrequencyPollSeconds = 0;
+        private volatile int highFrequencyPollMilliseconds = 0;
         private readonly FileSystemWatcher directoryWatcher;
 
         /////////////////////////////////////////////////////////////////////
@@ -464,8 +462,8 @@ namespace RSTK
                 //poll
                 while (!disposed)
                 {
-                    //sleep for one second
-                    ThreadExtensions.Sleep(1000, () => disposed);
+                    //sleep for 500ms
+                    ThreadExtensions.Sleep(500, () => disposed);
                     if (disposed)
                         break;
 
@@ -474,16 +472,16 @@ namespace RSTK
                     RefreshProcess();
                     bool running = process != null;
 
-                    //if no process, sleep for another 4 seconds
+                    //if no process, sleep for another 4500 milliseconds
                     //(so we only poll every 5 seconds when no game is running)
                     //...unless highFrequencyPollSeconds is > 0;
                     if (!running)
                     {
-                        if (highFrequencyPollSeconds > 0)
-                            --highFrequencyPollSeconds;
+                        if (highFrequencyPollMilliseconds > 0)
+                            highFrequencyPollMilliseconds -= 500;
                         else
                         {
-                            ThreadExtensions.Sleep(4000, () => disposed);
+                            ThreadExtensions.Sleep(4500, () => disposed);
                             if (disposed)
                                 break;
                         }
@@ -565,7 +563,7 @@ namespace RSTK
             }
             if (GameProcess != null)
             {
-                highFrequencyPollSeconds = 0;
+                highFrequencyPollMilliseconds = 0;
                 return;
             }
 
@@ -693,12 +691,12 @@ namespace RSTK
         // HIGH FREQUENCY POLL WINDOW
         /////////////////////////////////////////////////////////////////////
 
-        public void SetFastPollWindow(uint sec)
+        public void SetFastPollWindow(double sec)
         {
             this.DisposeCheck();
             if (process != null)
                 return;
-            highFrequencyPollSeconds = (int)Math.Min(sec, 10);
+            highFrequencyPollMilliseconds = (int)Math.Min(Math.Max(sec,0.0) * 1000.0, 10000.0);
         }
 
         /////////////////////////////////////////////////////////////////////
