@@ -123,6 +123,9 @@
   <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>123, 11</value>
   </metadata>
+  <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>123, 11</value>
+  </metadata>
   <data name="cbFullscreenMode.ToolTip" xml:space="preserve">
     <value>Windowed: Runs in a regular window.
 
@@ -147,7 +150,24 @@ when Fullscreen mode is set to Windowed.
 Major caveat, though: The size of the window will be exactly the size of the Resolution
 setting, because Rocksmith doesn't respond well to having it's window resized much
 beyond that. If you have a low-spec PC with a very high-resolution display, you may find
-this leads to some serious performance issues.</value>
+this leads to some serious performance issues.
+
+**Requires administrative permissions**</value>
+  </data>
+  <data name="checkCycleDisplays.ToolTip" xml:space="preserve">
+    <value>Off (unless you get the 'black screen' problem).
+
+When in ExclusiveFullscreen mode on newer PC's (particularly those with Windows 10),
+Rocksmith can cause the primary display to become locked in an invalid state when the
+game exits (the 'black screen' problem). Quitting the game via Alt-F4 or momentarily
+unplugging the primary monitor are both workarounds, but are tedious and easy to forget.
+
+With this option enabled, RSTK will cycle through all displays on the system when the game
+exits, disabling and re-enabling them in turn, getting out of the 'black screen' state automatically.
+
+This is an experimental feature; use it at your own risk!
+
+**Requires administrative permissions**</value>
   </data>
   <data name="checkExclusiveMode.ToolTip" xml:space="preserve">
     <value>Recommended setting: On
@@ -175,12 +195,13 @@ the number, the longer they take to fill (and the more latency is introduced int
 
 Going too high will lead to a severely diminished gameplay experience; going lower than what
 your CPU speed and memory bandwidth are capable of handling will lead to audio artefacts
-(clicks, pops, skipping, etc.).
+(clicks, pops, skipping, etc.), or even no sound at all!
+
 </value>
   </data>
   <data name="trackMaxOutputBufferSize.ToolTip" xml:space="preserve">
     <value>Recommended setting:
-100-150 for a very powerful PC;
+100-250 for a very powerful PC;
 250-400 for a moderately powerful PC;
 0 otherwise (Rocksmith decides- typically defaults to 1024).
 
@@ -189,7 +210,7 @@ longer it takes to fill (and the more latency is introduced into the gameplay).
 
 Going too high will lead to a severely diminished gameplay experience; going lower
 than what your CPU speed and memory bandwidth are capable of handling will lead
-to audio artefacts (clicks, pops, skipping, etc.).
+to audio artefacts (clicks, pops, skipping, etc.), or even no sound at all!
 </value>
   </data>
   <data name="lblEffectiveLatency.ToolTip" xml:space="preserve">
@@ -206,7 +227,7 @@ CPU speed and memory bandwidth are capable of handling will lead to audio artefa
 
 Enable this if you need to send debugging information to Ubisoft. It will create a text file called audiodump.txt,
 located in the same directory as the Rocksmith application. Once you have run the game with this switched on
- be sure to switch it off again next time (leaving it enabled can degrade performance).</value>
+be sure to switch it off again next time (leaving it enabled can degrade performance).</value>
   </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>47</value>

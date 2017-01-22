@@ -1,5 +1,4 @@
 ﻿using Marzersoft;
-using Marzersoft.Themes;
 using System;
 
 namespace RSTK
@@ -14,6 +13,9 @@ namespace RSTK
         {
             App.MainFormType = typeof(RSTKForm);
             App.Name = "RSTK";
+            App.Developer = "Mark 'marzer' Gillard";
+            App.Company = "Marzersoft";
+            App.Website = "http://www.marzersoft.com/";
             App.Description = "Config editor and launcher for Rocksmith and Rocksmith 2014";
             App.Mutex = true;
             App.AutoCheckForUpdates = false;

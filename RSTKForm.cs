@@ -1,14 +1,11 @@
 ﻿using Marzersoft.Forms;
 using System;
 using System.Threading;
-using System.Linq;
 using System.Windows.Forms;
 using Marzersoft;
 using System.IO;
 using System.Drawing;
 using System.Collections.Generic;
-using Marzersoft.Themes;
-using System.Reflection;
 using System.Diagnostics;
 
 namespace RSTK
@@ -16,9 +13,9 @@ namespace RSTK
     public partial class RSTKForm : MainForm
     {
         private Rocksmith rocksmith = null;
-        private volatile bool running = false, readingConfig = false;
+        private volatile bool running = false, readingConfig = false, showOnRocksmithExit = false;
         private readonly Marzersoft.Timer lastLaunchClickTimer
-            = new Marzersoft.Timer();
+            = new Marzersoft.Timer(-5.0);
         private readonly List<Control> disabledWhileRunning
             = new List<Control>();
         private readonly List<ToolStripItem> disabledWhileRunningToolStrip
@@ -63,20 +60,20 @@ namespace RSTK
             disabledWhileRunning.Add(cbFullscreenMode);
 
             //emulated fullscreen in windowed mode
-            checkEmulateFullscreen.CheckBox.Checked = App.Config.User.Get("emulated_fullscreen", false);
+            checkEmulateFullscreen.Checked = App.Config.User.Get("emulated_fullscreen", false);
             checkEmulateFullscreen.CheckBox.CheckedChanged += (s, e) =>
             {
                 if (rocksmith != null)
-                    rocksmith.EmulateFullscreenWhenWindowed = checkEmulateFullscreen.CheckBox.Checked;
-                checkEmulateFullscreen.ShowWarningIcon = checkEmulateFullscreen.CheckBox.Checked;
-                App.Config.User.Set("emulated_fullscreen", checkEmulateFullscreen.CheckBox.Checked);
+                    rocksmith.EmulateFullscreenWhenWindowed = checkEmulateFullscreen.Checked && App.IsAdministrator;
+                checkEmulateFullscreen.ShowWarningIcon = checkEmulateFullscreen.Checked;
+                App.Config.User.Set("emulated_fullscreen", checkEmulateFullscreen.Checked);
                 App.Config.User.Flush();
             };
 
             //exclusive mode
             checkExclusiveMode.CheckBox.CheckedChanged += (s, e) =>
             {
-                checkExclusiveMode.ShowWarningIcon = !checkExclusiveMode.CheckBox.Checked;
+                checkExclusiveMode.ShowWarningIcon = !checkExclusiveMode.Checked;
                 RefreshEffectiveLatency();
                 SaveConfigChanges();
             };
@@ -85,7 +82,7 @@ namespace RSTK
             //win32ultralowlatency
             checkUltraLowLatencyMode.CheckBox.CheckedChanged += (s, e) =>
             {
-                checkUltraLowLatencyMode.ShowWarningIcon = !checkUltraLowLatencyMode.CheckBox.Checked;
+                checkUltraLowLatencyMode.ShowWarningIcon = !checkUltraLowLatencyMode.Checked;
                 RefreshEffectiveLatency();
                 SaveConfigChanges();
             };
@@ -113,6 +110,39 @@ namespace RSTK
                 SaveConfigChanges();
             };
             disabledWhileRunning.Add(checkDumpAudioLog);
+
+            //run at startup
+            checkStartup.Checked = App.RunAtStartup;
+            checkStartup.CheckBox.CheckedChanged += (s, e) =>
+            {
+                App.RunAtStartup = checkStartup.Checked;
+            };
+
+            //hide rstk while rocksmith is running
+            checkAutoHide.Checked = App.Config.User.Get("auto_hide", true);
+            checkAutoHide.CheckBox.CheckedChanged += (s, e) =>
+            {
+                App.Config.User.Set("auto_hide", checkAutoHide.Checked);
+                App.Config.User.Flush();
+            };
+
+            //start minimized
+            checkStartMinimized.Checked = App.Config.User.Get("start_hidden", false);
+            checkStartMinimized.CheckBox.CheckedChanged += (s, e) =>
+            {
+                App.Config.User.Set("start_hidden", checkStartMinimized.Checked);
+                App.Config.User.Flush();
+            };
+
+            //cycle displays on exit
+            checkCycleDisplays.Checked = App.Config.User.Get("cycle_displays", false);
+            checkCycleDisplays.ShowWarningIcon = checkCycleDisplays.Checked;
+            checkCycleDisplays.CheckBox.CheckedChanged += (s, e) =>
+            {
+                checkCycleDisplays.ShowWarningIcon = checkCycleDisplays.Checked;
+                App.Config.User.Set("cycle_displays", checkCycleDisplays.Checked);
+                App.Config.User.Flush();
+            };
 
             //launch buttons
             disabledWhileRunning.Add(panLaunchButtons);
@@ -165,18 +195,6 @@ namespace RSTK
             tsLaunchSteam.Click += btnLaunchSteam_Click;
             disabledWhileRunningToolStrip.Add(tsLaunchSteam);
 
-            //show message if not in admin mode
-            /*
-            if (!App.IsAdministrator)
-            {
-                Logger.WarningMessage(this, "Oh my, it appears you're running RSTK as a regular user." +
-                    "\r\n\r\nRSTK requires elevated permissions to monitor the state of the Rocksmith process " +
-                    "(and potentially more, depending on your system setup)." +
-                    "\r\n\r\nFor best results (and less unpredictable weirdness), consider relaunching RSTK " +
-                    "with elevated permissions (\"Run as Administrator\").");
-            }
-            */
-
             //check command line params
             string path = "";
             if (App.Arguments.Value("path", ref path)
@@ -189,17 +207,36 @@ namespace RSTK
                 && File.Exists(path = path.Trim()))
                 SetRocksmithPath(Path.GetFullPath(path), false);
 
-            //bring to front of z order
-            BringToFront();
+            //show/hide properly
+            this.Execute(() =>
+            {
+                if (checkStartMinimized.Checked)
+                    Hide();
+                else
+                    BringToFront();
+                Opacity = 1.0;
+
+                //show message if not in admin mode
+                /*
+                if (!App.IsAdministrator)
+                {
+                    Logger.WarningMessage(this, "Oh my, it appears you're running RSTK as a regular user." +
+                        "\r\n\r\nRSTK requires elevated permissions to monitor the state of the Rocksmith process " +
+                        "(and potentially more, depending on your system setup)." +
+                        "\r\n\r\nFor best results (and less unpredictable weirdness), consider relaunching RSTK " +
+                        "with elevated permissions (\"Run as Administrator\").");
+                }
+                */
+            });
         }
 
         private void RefreshEffectiveLatency()
         {
             var lat = Rocksmith.CalulateEffectiveLatency((uint)trackMaxOutputBufferSize.TrackBar.Value,
                 (uint)trackLatencyBuffer.TrackBar.Value);
-            if (!checkExclusiveMode.CheckBox.Checked)
+            if (!checkExclusiveMode.Checked)
                 lat *= 1.5;
-            if (!checkUltraLowLatencyMode.CheckBox.Checked)
+            if (!checkUltraLowLatencyMode.Checked)
                 lat *= 1.5;
             lblEffectiveLatency.Value = string.Format("{0:0} ms", lat);
             lblEffectiveLatency.ShowWarningIcon = lat < 10.0 || lat > 75.0;
@@ -231,8 +268,11 @@ namespace RSTK
                 if (Debugger.IsAttached)
                     throw;
 #endif
-                Logger.ErrorMessage(this, "Error instantiating Rocksmith manager:\r\n\r\nPath: {0}\r\nMessage: {1}",
+                this.Execute(() => //asyncronously
+                {
+                    Logger.ErrorMessage(this, "Error instantiating Rocksmith manager:\r\n\r\nPath: {0}\r\nMessage: {1}",
                     fullPath, e.Message);
+                });
                 return false;
             }
 
@@ -242,7 +282,8 @@ namespace RSTK
 
             //assign new instance
             rocksmith = newRocksmith;
-            rocksmith.EmulateFullscreenWhenWindowed = checkEmulateFullscreen.CheckBox.Checked;
+            rocksmith.EmulateFullscreenWhenWindowed =  checkEmulateFullscreen.Checked && App.IsAdministrator;
+            rocksmith.SetFastPollWindow(10.0);
 
             //sync controls with config
             RocksmithConfigRead(rocksmith);
@@ -261,6 +302,12 @@ namespace RSTK
                     lblStatus.Text = string.Format("{0} Running.", Path.GetFileNameWithoutExtension(rs.GamePath));
                     pbStatus.Image = App.Images.Resource("rstk_64", App.Assembly);
                     TrayIcon.Icon = Icon = App.Icons.Resource("rstk_icon", App.Assembly);
+                    if (checkAutoHide.Checked && Visible)
+                    {
+                        Hide();
+                        showOnRocksmithExit = true;
+                    }
+
                 }, false);
             };
 
@@ -269,13 +316,97 @@ namespace RSTK
             {
                 this.Execute(() =>
                 {
+                    //cycle adapters
+                    if (App.IsAdministrator
+                        && checkCycleDisplays.Checked
+                        && rs.FullscreenMode == Rocksmith.FullscreenModes.ExclusiveFullscreen)
+                    {
+                        //get adapters (sorted by primary first)
+                        string[] displayAdapters = null;
+                        try
+                        {
+                            displayAdapters = Devices.EnumerateDisplayAdapters(true);
+                        }
+                        catch (Exception ex)
+                        {
+#if DEBUG
+                            if (Debugger.IsAttached)
+                                throw;
+#endif
+                            this.Execute(() => //asyncronously
+                            {
+                                Logger.ErrorMessage(this, "Error querying system displays:\r\n\r\n{0}",
+                                ex.Message);
+                            });
+                        }
+
+                        if (displayAdapters.Length > 0)
+                        {
+#if DEBUG
+                            Logger.V("Display Adapters by ID:\n{0}", string.Join(",\n", displayAdapters));
+#endif
+                            //wait for game
+                            Thread.Sleep(250);
+
+                            //disable all
+                            foreach (var displayAdapter in displayAdapters)
+                            {
+                                //Thread.Sleep(250);
+                                try
+                                {
+                                    Devices.DisableDevice(Devices.ClassGuid_DisplayAdapters, displayAdapter);
+                                }
+                                catch (Exception ex)
+                                {
+#if DEBUG
+                                    if (Debugger.IsAttached)
+                                        throw;
+#endif
+                                    Logger.E("DisableDevice failed:\r\n{0}\r\n{1}", displayAdapter, ex.Message);
+                                }
+                            }
+
+                            //enable all
+                            foreach (var displayAdapter in displayAdapters)
+                            {
+                                //Thread.Sleep(250);
+                                try
+                                {
+                                    Devices.EnableDevice(Devices.ClassGuid_DisplayAdapters, displayAdapter);
+                                }
+                                catch (Exception ex)
+                                {
+#if DEBUG
+                                    if (Debugger.IsAttached)
+                                        throw;
+#endif
+                                    Logger.E("EnableDevice failed:\r\n{0}\r\n{1}", displayAdapter, ex.Message);
+                                }
+                            }
+                        }
+                    }
+
+                    //re-enable controls
                     foreach (var c in disabledWhileRunning)
                         c.Enabled = true;
                     foreach (var c in disabledWhileRunningToolStrip)
                         c.Enabled = true;
-                    lblStatus.Text = string.Format("Waiting for {0}", Path.GetFileNameWithoutExtension(rs.GamePath));
+
+                    //update labels and icons
+                    lblStatus.Text = "Waiting for Rocksmith";
                     pbStatus.Image = App.Images.Resource("rstk_waiting_64", App.Assembly);
                     TrayIcon.Icon = Icon = App.Icons.Resource("rstk_waiting_icon", App.Assembly);
+
+                    //show window
+                    if (checkAutoHide.Checked && !Visible && showOnRocksmithExit)
+                    {
+                        Show();
+                        BringToFront();
+                    }
+
+                    //repaint window
+                    if (Visible)
+                        RefreshNonClient();
                 }, false);
                 running = false;
             };
@@ -288,7 +419,8 @@ namespace RSTK
                 = tsLaunchSteam.Visible
                 = true;
             panRocksmithPath.Visible = false;
-            lblStatus.Text = string.Format("Waiting for {0}", Path.GetFileNameWithoutExtension(fullPath));
+            lblStatus.Text = "Waiting for Rocksmith";
+            flowLayoutPanel.FitAllChildren();
 
             //write to config
             if (writeToConfig)
@@ -305,8 +437,8 @@ namespace RSTK
             {
                 readingConfig = true;
 
-                checkExclusiveMode.CheckBox.Checked = rs.ExclusiveMode;
-                checkUltraLowLatencyMode.CheckBox.Checked = rs.Win32UltraLowLatencyMode;
+                checkExclusiveMode.Checked = rs.ExclusiveMode;
+                checkUltraLowLatencyMode.Checked = rs.Win32UltraLowLatencyMode;
                 for (int i = 0; i < Rocksmith.SupportedResolutions.Count; ++i)
                 {
                     if (Rocksmith.SupportedResolutions[i].Item1 == rs.Resolution.Width
@@ -319,8 +451,8 @@ namespace RSTK
                 cbFullscreenMode.ComboBox.SelectedIndex = (int)rs.FullscreenMode;
                 trackLatencyBuffer.TrackBar.Value = (int)rs.LatencyBuffer;
                 trackMaxOutputBufferSize.TrackBar.Value = (int)rs.MaxOutputBufferSize;
-                checkMicrophone.CheckBox.Checked = rs.EnableMicrophone;
-                checkDumpAudioLog.CheckBox.Checked = rs.DumpAudioLog;
+                checkMicrophone.Checked = rs.EnableMicrophone;
+                checkDumpAudioLog.Checked = rs.DumpAudioLog;
 
                 readingConfig = false;
             }, false);
@@ -334,7 +466,7 @@ namespace RSTK
             if (lastLaunchClickTimer.Seconds < 5.0)
                 return;
             lastLaunchClickTimer.Reset();
-            rocksmith.SetFastPollWindow(10);
+            rocksmith.SetFastPollWindow(10.0);
 
             Process.Start(rocksmith.SteamRunCommand);
         }
@@ -358,30 +490,19 @@ namespace RSTK
 
         private void flowLayoutPanel_Resize(object sender, EventArgs e)
         {
-            flowLayoutPanel.SuspendLayout();
-
-            var w = flowLayoutPanel.Width;
-            foreach (var c in flowLayoutPanel.Controls)
-                (c as Control).Width = w;
-            if (flowLayoutPanel.VerticalScrollbarVisible())
-            {
-                foreach (var c in flowLayoutPanel.Controls)
-                    (c as Control).Width -= SystemInformation.VerticalScrollBarWidth + 8;
-            }
-
-            flowLayoutPanel.ResumeLayout();
+            flowLayoutPanel.FitAllChildren();
         }
 
         private void btnLaunch_EnabledChanged(object sender, EventArgs e)
         {
             btnLaunch.Image = App.Images.Resource("gamepad_24",
-                (sender as Button).Enabled ? "" : "alpha", App.Assembly);
+                (sender as Button).Enabled ? "" : "30% alpha", App.Assembly);
         }
 
         private void btnLaunchSteam_EnabledChanged(object sender, EventArgs e)
         {
             btnLaunchSteam.Image = App.Images.Resource("steam_24",
-                (sender as Button).Enabled ? "" : "alpha", App.Assembly);
+                (sender as Button).Enabled ? "" : "30% alpha", App.Assembly);
         }
 
         private void lblAbout_Click(object sender, EventArgs e)
@@ -394,18 +515,30 @@ namespace RSTK
             if (rocksmith == null || running || readingConfig)
                 return;
 
-            rocksmith.ExclusiveMode = checkExclusiveMode.CheckBox.Checked;
-            rocksmith.Win32UltraLowLatencyMode = checkUltraLowLatencyMode.CheckBox.Checked;
+            rocksmith.ExclusiveMode = checkExclusiveMode.Checked;
+            rocksmith.Win32UltraLowLatencyMode = checkUltraLowLatencyMode.Checked;
             rocksmith.Resolution = new Size(
                 (int)Rocksmith.SupportedResolutions[cbResolution.ComboBox.SelectedIndex].Item1,
                 (int)Rocksmith.SupportedResolutions[cbResolution.ComboBox.SelectedIndex].Item2);
             rocksmith.FullscreenMode = (Rocksmith.FullscreenModes)cbFullscreenMode.ComboBox.SelectedIndex;
             rocksmith.LatencyBuffer = (uint)trackLatencyBuffer.TrackBar.Value;
             rocksmith.MaxOutputBufferSize = (uint)trackMaxOutputBufferSize.TrackBar.Value;
-            rocksmith.EnableMicrophone = checkMicrophone.CheckBox.Checked;
-            rocksmith.DumpAudioLog = checkDumpAudioLog.CheckBox.Checked;
+            rocksmith.EnableMicrophone = checkMicrophone.Checked;
+            rocksmith.DumpAudioLog = checkDumpAudioLog.Checked;
 
             rocksmith.WriteConfig();
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            showOnRocksmithExit = false;
+        }
+
+        protected override void OnVisibleChanged(EventArgs e)
+        {
+            base.OnVisibleChanged(e);
+            showOnRocksmithExit = false;
         }
     }
 }

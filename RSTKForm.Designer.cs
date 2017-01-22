@@ -45,14 +45,11 @@
             this.panRocksmithPath = new System.Windows.Forms.Panel();
             this.flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.themedLabel4 = new Marzersoft.Themes.ThemedLabel();
-            this.themedLabel1 = new Marzersoft.Themes.ThemedLabel();
-            this.themedLabel2 = new Marzersoft.Themes.ThemedLabel();
-            this.panStatus = new System.Windows.Forms.Panel();
-            this.lblAbout = new Marzersoft.Themes.ThemedLabel();
-            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.cbResolution = new RSTK.ComboBoxRow();
             this.cbFullscreenMode = new RSTK.ComboBoxRow();
             this.checkEmulateFullscreen = new RSTK.CheckBoxRow();
+            this.checkCycleDisplays = new RSTK.CheckBoxRow();
+            this.themedLabel1 = new Marzersoft.Themes.ThemedLabel();
             this.checkExclusiveMode = new RSTK.CheckBoxRow();
             this.checkUltraLowLatencyMode = new RSTK.CheckBoxRow();
             this.trackLatencyBuffer = new RSTK.TrackBarRow();
@@ -60,6 +57,13 @@
             this.lblEffectiveLatency = new RSTK.TextRow();
             this.checkMicrophone = new RSTK.CheckBoxRow();
             this.checkDumpAudioLog = new RSTK.CheckBoxRow();
+            this.themedLabel2 = new Marzersoft.Themes.ThemedLabel();
+            this.checkStartup = new RSTK.CheckBoxRow();
+            this.checkStartMinimized = new RSTK.CheckBoxRow();
+            this.checkAutoHide = new RSTK.CheckBoxRow();
+            this.panStatus = new System.Windows.Forms.Panel();
+            this.lblAbout = new Marzersoft.Themes.ThemedLabel();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pbStatus)).BeginInit();
             this.panLaunchButtons.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitter)).BeginInit();
@@ -68,9 +72,9 @@
             this.splitter.SuspendLayout();
             this.panRocksmithPath.SuspendLayout();
             this.flowLayoutPanel.SuspendLayout();
-            this.panStatus.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackLatencyBuffer.TrackBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackMaxOutputBufferSize.TrackBar)).BeginInit();
+            this.panStatus.SuspendLayout();
             this.SuspendLayout();
             // 
             // pbStatus
@@ -80,7 +84,7 @@
             this.pbStatus.Location = new System.Drawing.Point(0, 0);
             this.pbStatus.Margin = new System.Windows.Forms.Padding(0);
             this.pbStatus.Name = "pbStatus";
-            this.pbStatus.Size = new System.Drawing.Size(67, 100);
+            this.pbStatus.Size = new System.Drawing.Size(134, 100);
             this.pbStatus.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbStatus.TabIndex = 2;
             this.pbStatus.TabStop = false;
@@ -92,7 +96,7 @@
             this.lblStatus.Location = new System.Drawing.Point(0, 100);
             this.lblStatus.Margin = new System.Windows.Forms.Padding(0);
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(67, 77);
+            this.lblStatus.Size = new System.Drawing.Size(134, 57);
             this.lblStatus.TabIndex = 1;
             this.lblStatus.Text = "Waiting for game path.";
             this.lblStatus.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -118,7 +122,7 @@
             this.btnRocksmithPath.FlatAppearance.BorderSize = 0;
             this.btnRocksmithPath.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRocksmithPath.Image = global::RSTK.Properties.Resources.open_16;
-            this.btnRocksmithPath.Location = new System.Drawing.Point(703, 35);
+            this.btnRocksmithPath.Location = new System.Drawing.Point(820, 35);
             this.btnRocksmithPath.Margin = new System.Windows.Forms.Padding(0);
             this.btnRocksmithPath.Name = "btnRocksmithPath";
             this.btnRocksmithPath.Size = new System.Drawing.Size(26, 26);
@@ -135,7 +139,7 @@
             this.themedLabel3.Location = new System.Drawing.Point(0, 0);
             this.themedLabel3.Margin = new System.Windows.Forms.Padding(0);
             this.themedLabel3.Name = "themedLabel3";
-            this.themedLabel3.Size = new System.Drawing.Size(729, 30);
+            this.themedLabel3.Size = new System.Drawing.Size(846, 30);
             this.themedLabel3.TabIndex = 25;
             this.themedLabel3.Text = "Rocksmith Location";
             // 
@@ -148,7 +152,7 @@
             this.tbRocksmithPath.Margin = new System.Windows.Forms.Padding(0);
             this.tbRocksmithPath.Name = "tbRocksmithPath";
             this.tbRocksmithPath.ReadOnly = true;
-            this.tbRocksmithPath.Size = new System.Drawing.Size(695, 20);
+            this.tbRocksmithPath.Size = new System.Drawing.Size(812, 20);
             this.tbRocksmithPath.TabIndex = 1;
             // 
             // dlgBrowse
@@ -169,10 +173,13 @@
             this.btnLaunch.Margin = new System.Windows.Forms.Padding(0);
             this.btnLaunch.Name = "btnLaunch";
             this.btnLaunch.Padding = new System.Windows.Forms.Padding(0, 5, 0, 5);
-            this.btnLaunch.Size = new System.Drawing.Size(67, 65);
+            this.btnLaunch.Size = new System.Drawing.Size(134, 70);
             this.btnLaunch.TabIndex = 100;
             this.btnLaunch.Text = "Launch";
             this.btnLaunch.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.toolTip.SetToolTip(this.btnLaunch, "Launches Rocksmith by directly launching the game\'s executable. Unless you have e" +
+        "xplicit reason to do this\r\n(you will know if you do), it is recommended that you" +
+        " use Launch via Steam instead.");
             this.btnLaunch.UseVisualStyleBackColor = true;
             this.btnLaunch.EnabledChanged += new System.EventHandler(this.btnLaunch_EnabledChanged);
             this.btnLaunch.Click += new System.EventHandler(this.btnLaunch_Click);
@@ -190,10 +197,11 @@
             this.btnLaunchSteam.Margin = new System.Windows.Forms.Padding(0);
             this.btnLaunchSteam.Name = "btnLaunchSteam";
             this.btnLaunchSteam.Padding = new System.Windows.Forms.Padding(0, 5, 0, 5);
-            this.btnLaunchSteam.Size = new System.Drawing.Size(67, 65);
+            this.btnLaunchSteam.Size = new System.Drawing.Size(134, 70);
             this.btnLaunchSteam.TabIndex = 101;
             this.btnLaunchSteam.Text = "Launch via Steam";
             this.btnLaunchSteam.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.toolTip.SetToolTip(this.btnLaunchSteam, "Launches the game via Steam.");
             this.btnLaunchSteam.UseVisualStyleBackColor = true;
             this.btnLaunchSteam.EnabledChanged += new System.EventHandler(this.btnLaunchSteam_EnabledChanged);
             this.btnLaunchSteam.Click += new System.EventHandler(this.btnLaunchSteam_Click);
@@ -203,11 +211,11 @@
             this.panLaunchButtons.Controls.Add(this.btnLaunch);
             this.panLaunchButtons.Controls.Add(this.btnLaunchSteam);
             this.panLaunchButtons.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panLaunchButtons.Location = new System.Drawing.Point(10, 187);
+            this.panLaunchButtons.Location = new System.Drawing.Point(10, 167);
             this.panLaunchButtons.Margin = new System.Windows.Forms.Padding(0);
             this.panLaunchButtons.Name = "panLaunchButtons";
             this.panLaunchButtons.Padding = new System.Windows.Forms.Padding(0, 20, 0, 0);
-            this.panLaunchButtons.Size = new System.Drawing.Size(67, 553);
+            this.panLaunchButtons.Size = new System.Drawing.Size(134, 642);
             this.panLaunchButtons.TabIndex = 28;
             this.panLaunchButtons.Visible = false;
             // 
@@ -231,8 +239,8 @@
             this.splitter.Panel2.Controls.Add(this.panStatus);
             this.splitter.Panel2.Controls.Add(this.lblAbout);
             this.splitter.Panel2.Padding = new System.Windows.Forms.Padding(10);
-            this.splitter.Size = new System.Drawing.Size(837, 774);
-            this.splitter.SplitterDistance = 749;
+            this.splitter.Size = new System.Drawing.Size(1021, 843);
+            this.splitter.SplitterDistance = 866;
             this.splitter.SplitterWidth = 1;
             this.splitter.TabIndex = 29;
             this.splitter.TabStop = false;
@@ -246,7 +254,7 @@
             this.panRocksmithPath.Controls.Add(this.btnRocksmithPath);
             this.panRocksmithPath.Location = new System.Drawing.Point(10, 10);
             this.panRocksmithPath.Name = "panRocksmithPath";
-            this.panRocksmithPath.Size = new System.Drawing.Size(729, 100);
+            this.panRocksmithPath.Size = new System.Drawing.Size(846, 79);
             this.panRocksmithPath.TabIndex = 31;
             // 
             // flowLayoutPanel
@@ -259,6 +267,7 @@
             this.flowLayoutPanel.Controls.Add(this.cbResolution);
             this.flowLayoutPanel.Controls.Add(this.cbFullscreenMode);
             this.flowLayoutPanel.Controls.Add(this.checkEmulateFullscreen);
+            this.flowLayoutPanel.Controls.Add(this.checkCycleDisplays);
             this.flowLayoutPanel.Controls.Add(this.themedLabel1);
             this.flowLayoutPanel.Controls.Add(this.checkExclusiveMode);
             this.flowLayoutPanel.Controls.Add(this.checkUltraLowLatencyMode);
@@ -266,13 +275,16 @@
             this.flowLayoutPanel.Controls.Add(this.trackMaxOutputBufferSize);
             this.flowLayoutPanel.Controls.Add(this.lblEffectiveLatency);
             this.flowLayoutPanel.Controls.Add(this.checkMicrophone);
-            this.flowLayoutPanel.Controls.Add(this.themedLabel2);
             this.flowLayoutPanel.Controls.Add(this.checkDumpAudioLog);
+            this.flowLayoutPanel.Controls.Add(this.themedLabel2);
+            this.flowLayoutPanel.Controls.Add(this.checkStartup);
+            this.flowLayoutPanel.Controls.Add(this.checkStartMinimized);
+            this.flowLayoutPanel.Controls.Add(this.checkAutoHide);
             this.flowLayoutPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel.Location = new System.Drawing.Point(10, 124);
             this.flowLayoutPanel.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel.Name = "flowLayoutPanel";
-            this.flowLayoutPanel.Size = new System.Drawing.Size(729, 640);
+            this.flowLayoutPanel.Size = new System.Drawing.Size(846, 709);
             this.flowLayoutPanel.TabIndex = 30;
             this.flowLayoutPanel.Visible = false;
             this.flowLayoutPanel.WrapContents = false;
@@ -290,65 +302,6 @@
             this.themedLabel4.TabIndex = 26;
             this.themedLabel4.Text = "Renderer/Window Settings";
             // 
-            // themedLabel1
-            // 
-            this.themedLabel1.Accent = ((uint)(0u));
-            this.themedLabel1.AccentMode = true;
-            this.themedLabel1.FontSize = 1;
-            this.themedLabel1.Location = new System.Drawing.Point(0, 140);
-            this.themedLabel1.Margin = new System.Windows.Forms.Padding(0, 20, 0, 0);
-            this.themedLabel1.Name = "themedLabel1";
-            this.themedLabel1.Size = new System.Drawing.Size(442, 30);
-            this.themedLabel1.TabIndex = 30;
-            this.themedLabel1.Text = "Audio Settings";
-            // 
-            // themedLabel2
-            // 
-            this.themedLabel2.Accent = ((uint)(0u));
-            this.themedLabel2.AccentMode = true;
-            this.themedLabel2.FontSize = 1;
-            this.themedLabel2.Location = new System.Drawing.Point(0, 370);
-            this.themedLabel2.Margin = new System.Windows.Forms.Padding(0, 20, 0, 0);
-            this.themedLabel2.Name = "themedLabel2";
-            this.themedLabel2.Size = new System.Drawing.Size(442, 30);
-            this.themedLabel2.TabIndex = 37;
-            this.themedLabel2.Text = "Miscellaneous Settings";
-            // 
-            // panStatus
-            // 
-            this.panStatus.Controls.Add(this.lblStatus);
-            this.panStatus.Controls.Add(this.pbStatus);
-            this.panStatus.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panStatus.Location = new System.Drawing.Point(10, 10);
-            this.panStatus.Margin = new System.Windows.Forms.Padding(0, 0, 0, 20);
-            this.panStatus.Name = "panStatus";
-            this.panStatus.Size = new System.Drawing.Size(67, 177);
-            this.panStatus.TabIndex = 29;
-            // 
-            // lblAbout
-            // 
-            this.lblAbout.Accent = ((uint)(0u));
-            this.lblAbout.AccentMode = true;
-            this.lblAbout.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.lblAbout.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.lblAbout.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblAbout.Location = new System.Drawing.Point(10, 740);
-            this.lblAbout.Margin = new System.Windows.Forms.Padding(0);
-            this.lblAbout.Name = "lblAbout";
-            this.lblAbout.Size = new System.Drawing.Size(67, 24);
-            this.lblAbout.TabIndex = 102;
-            this.lblAbout.Text = "About";
-            this.lblAbout.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblAbout.Click += new System.EventHandler(this.lblAbout_Click);
-            // 
-            // toolTip
-            // 
-            this.toolTip.AutomaticDelay = 5000;
-            this.toolTip.AutoPopDelay = 32767;
-            this.toolTip.InitialDelay = 150;
-            this.toolTip.ReshowDelay = 1000;
-            this.toolTip.ShowAlways = true;
-            // 
             // cbResolution
             // 
             // 
@@ -361,7 +314,7 @@
             this.cbResolution.ComboBox.Location = new System.Drawing.Point(0, 5);
             this.cbResolution.ComboBox.Margin = new System.Windows.Forms.Padding(0);
             this.cbResolution.ComboBox.Name = "";
-            this.cbResolution.ComboBox.Size = new System.Drawing.Size(257, 21);
+            this.cbResolution.ComboBox.Size = new System.Drawing.Size(177, 21);
             this.cbResolution.ComboBox.TabIndex = 0;
             this.cbResolution.Location = new System.Drawing.Point(0, 30);
             this.cbResolution.Margin = new System.Windows.Forms.Padding(0);
@@ -382,7 +335,7 @@
             this.cbFullscreenMode.ComboBox.Location = new System.Drawing.Point(0, 5);
             this.cbFullscreenMode.ComboBox.Margin = new System.Windows.Forms.Padding(0);
             this.cbFullscreenMode.ComboBox.Name = "";
-            this.cbFullscreenMode.ComboBox.Size = new System.Drawing.Size(257, 21);
+            this.cbFullscreenMode.ComboBox.Size = new System.Drawing.Size(177, 21);
             this.cbFullscreenMode.ComboBox.TabIndex = 0;
             this.cbFullscreenMode.Location = new System.Drawing.Point(0, 60);
             this.cbFullscreenMode.Margin = new System.Windows.Forms.Padding(0);
@@ -401,7 +354,7 @@
             this.checkEmulateFullscreen.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkEmulateFullscreen.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkEmulateFullscreen.CheckBox.Name = "";
-            this.checkEmulateFullscreen.CheckBox.Size = new System.Drawing.Size(257, 30);
+            this.checkEmulateFullscreen.CheckBox.Size = new System.Drawing.Size(177, 30);
             this.checkEmulateFullscreen.CheckBox.TabIndex = 0;
             this.checkEmulateFullscreen.CheckBox.Text = "(only applies in Windowed mode)";
             this.checkEmulateFullscreen.Location = new System.Drawing.Point(0, 90);
@@ -411,6 +364,38 @@
             this.checkEmulateFullscreen.TabIndex = 29;
             this.checkEmulateFullscreen.Text = "Emulate fullscreen";
             this.toolTip.SetToolTip(this.checkEmulateFullscreen, resources.GetString("checkEmulateFullscreen.ToolTip"));
+            // 
+            // checkCycleDisplays
+            // 
+            // 
+            // 
+            // 
+            this.checkCycleDisplays.CheckBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkCycleDisplays.CheckBox.Location = new System.Drawing.Point(0, 0);
+            this.checkCycleDisplays.CheckBox.Margin = new System.Windows.Forms.Padding(0);
+            this.checkCycleDisplays.CheckBox.Name = "";
+            this.checkCycleDisplays.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkCycleDisplays.CheckBox.TabIndex = 0;
+            this.checkCycleDisplays.CheckBox.Text = "(only applies in ExclusiveFullscreen mode)";
+            this.checkCycleDisplays.Location = new System.Drawing.Point(0, 120);
+            this.checkCycleDisplays.Margin = new System.Windows.Forms.Padding(0);
+            this.checkCycleDisplays.Name = "checkCycleDisplays";
+            this.checkCycleDisplays.Size = new System.Drawing.Size(442, 30);
+            this.checkCycleDisplays.TabIndex = 42;
+            this.checkCycleDisplays.Text = "Cycle displays when Rocksmith exits";
+            this.toolTip.SetToolTip(this.checkCycleDisplays, resources.GetString("checkCycleDisplays.ToolTip"));
+            // 
+            // themedLabel1
+            // 
+            this.themedLabel1.Accent = ((uint)(0u));
+            this.themedLabel1.AccentMode = true;
+            this.themedLabel1.FontSize = 1;
+            this.themedLabel1.Location = new System.Drawing.Point(0, 170);
+            this.themedLabel1.Margin = new System.Windows.Forms.Padding(0, 20, 0, 0);
+            this.themedLabel1.Name = "themedLabel1";
+            this.themedLabel1.Size = new System.Drawing.Size(442, 30);
+            this.themedLabel1.TabIndex = 30;
+            this.themedLabel1.Text = "Audio Settings";
             // 
             // checkExclusiveMode
             // 
@@ -423,9 +408,9 @@
             this.checkExclusiveMode.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkExclusiveMode.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkExclusiveMode.CheckBox.Name = "";
-            this.checkExclusiveMode.CheckBox.Size = new System.Drawing.Size(257, 30);
+            this.checkExclusiveMode.CheckBox.Size = new System.Drawing.Size(177, 30);
             this.checkExclusiveMode.CheckBox.TabIndex = 0;
-            this.checkExclusiveMode.Location = new System.Drawing.Point(0, 170);
+            this.checkExclusiveMode.Location = new System.Drawing.Point(0, 200);
             this.checkExclusiveMode.Margin = new System.Windows.Forms.Padding(0);
             this.checkExclusiveMode.Name = "checkExclusiveMode";
             this.checkExclusiveMode.Size = new System.Drawing.Size(442, 30);
@@ -444,9 +429,9 @@
             this.checkUltraLowLatencyMode.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkUltraLowLatencyMode.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkUltraLowLatencyMode.CheckBox.Name = "";
-            this.checkUltraLowLatencyMode.CheckBox.Size = new System.Drawing.Size(257, 30);
+            this.checkUltraLowLatencyMode.CheckBox.Size = new System.Drawing.Size(177, 30);
             this.checkUltraLowLatencyMode.CheckBox.TabIndex = 0;
-            this.checkUltraLowLatencyMode.Location = new System.Drawing.Point(0, 200);
+            this.checkUltraLowLatencyMode.Location = new System.Drawing.Point(0, 230);
             this.checkUltraLowLatencyMode.Margin = new System.Windows.Forms.Padding(0);
             this.checkUltraLowLatencyMode.Name = "checkUltraLowLatencyMode";
             this.checkUltraLowLatencyMode.Size = new System.Drawing.Size(442, 30);
@@ -456,7 +441,7 @@
             // 
             // trackLatencyBuffer
             // 
-            this.trackLatencyBuffer.Location = new System.Drawing.Point(0, 230);
+            this.trackLatencyBuffer.Location = new System.Drawing.Point(0, 260);
             this.trackLatencyBuffer.Margin = new System.Windows.Forms.Padding(0);
             this.trackLatencyBuffer.Name = "trackLatencyBuffer";
             this.trackLatencyBuffer.Size = new System.Drawing.Size(442, 30);
@@ -476,13 +461,12 @@
             this.trackLatencyBuffer.TrackBar.Maximum = 16;
             this.trackLatencyBuffer.TrackBar.Minimum = 1;
             this.trackLatencyBuffer.TrackBar.Name = "";
-            this.trackLatencyBuffer.TrackBar.Size = new System.Drawing.Size(214, 30);
             this.trackLatencyBuffer.TrackBar.TabIndex = 1;
             this.trackLatencyBuffer.TrackBar.Value = 4;
             // 
             // trackMaxOutputBufferSize
             // 
-            this.trackMaxOutputBufferSize.Location = new System.Drawing.Point(0, 260);
+            this.trackMaxOutputBufferSize.Location = new System.Drawing.Point(0, 290);
             this.trackMaxOutputBufferSize.Margin = new System.Windows.Forms.Padding(0);
             this.trackMaxOutputBufferSize.Name = "trackMaxOutputBufferSize";
             this.trackMaxOutputBufferSize.Size = new System.Drawing.Size(442, 30);
@@ -501,14 +485,13 @@
             this.trackMaxOutputBufferSize.TrackBar.Margin = new System.Windows.Forms.Padding(0);
             this.trackMaxOutputBufferSize.TrackBar.Maximum = 2048;
             this.trackMaxOutputBufferSize.TrackBar.Name = "";
-            this.trackMaxOutputBufferSize.TrackBar.Size = new System.Drawing.Size(214, 30);
             this.trackMaxOutputBufferSize.TrackBar.SmallChange = 8;
             this.trackMaxOutputBufferSize.TrackBar.TabIndex = 1;
             this.trackMaxOutputBufferSize.TrackBar.TickFrequency = 32;
             // 
             // lblEffectiveLatency
             // 
-            this.lblEffectiveLatency.Location = new System.Drawing.Point(0, 290);
+            this.lblEffectiveLatency.Location = new System.Drawing.Point(0, 320);
             this.lblEffectiveLatency.Margin = new System.Windows.Forms.Padding(0);
             this.lblEffectiveLatency.Name = "lblEffectiveLatency";
             this.lblEffectiveLatency.Size = new System.Drawing.Size(442, 30);
@@ -526,9 +509,9 @@
             this.checkMicrophone.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkMicrophone.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkMicrophone.CheckBox.Name = "";
-            this.checkMicrophone.CheckBox.Size = new System.Drawing.Size(257, 30);
+            this.checkMicrophone.CheckBox.Size = new System.Drawing.Size(177, 30);
             this.checkMicrophone.CheckBox.TabIndex = 0;
-            this.checkMicrophone.Location = new System.Drawing.Point(0, 320);
+            this.checkMicrophone.Location = new System.Drawing.Point(0, 350);
             this.checkMicrophone.Margin = new System.Windows.Forms.Padding(0);
             this.checkMicrophone.Name = "checkMicrophone";
             this.checkMicrophone.Size = new System.Drawing.Size(442, 30);
@@ -546,9 +529,9 @@
             this.checkDumpAudioLog.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkDumpAudioLog.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkDumpAudioLog.CheckBox.Name = "";
-            this.checkDumpAudioLog.CheckBox.Size = new System.Drawing.Size(257, 30);
+            this.checkDumpAudioLog.CheckBox.Size = new System.Drawing.Size(177, 30);
             this.checkDumpAudioLog.CheckBox.TabIndex = 0;
-            this.checkDumpAudioLog.Location = new System.Drawing.Point(0, 400);
+            this.checkDumpAudioLog.Location = new System.Drawing.Point(0, 380);
             this.checkDumpAudioLog.Margin = new System.Windows.Forms.Padding(0);
             this.checkDumpAudioLog.Name = "checkDumpAudioLog";
             this.checkDumpAudioLog.Size = new System.Drawing.Size(442, 30);
@@ -556,15 +539,125 @@
             this.checkDumpAudioLog.Text = "Dump audio log";
             this.toolTip.SetToolTip(this.checkDumpAudioLog, resources.GetString("checkDumpAudioLog.ToolTip"));
             // 
+            // themedLabel2
+            // 
+            this.themedLabel2.Accent = ((uint)(0u));
+            this.themedLabel2.AccentMode = true;
+            this.themedLabel2.FontSize = 1;
+            this.themedLabel2.Location = new System.Drawing.Point(0, 430);
+            this.themedLabel2.Margin = new System.Windows.Forms.Padding(0, 20, 0, 0);
+            this.themedLabel2.Name = "themedLabel2";
+            this.themedLabel2.Size = new System.Drawing.Size(442, 30);
+            this.themedLabel2.TabIndex = 37;
+            this.themedLabel2.Text = "RSTK Settings";
+            // 
+            // checkStartup
+            // 
+            // 
+            // 
+            // 
+            this.checkStartup.CheckBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkStartup.CheckBox.Location = new System.Drawing.Point(0, 0);
+            this.checkStartup.CheckBox.Margin = new System.Windows.Forms.Padding(0);
+            this.checkStartup.CheckBox.Name = "";
+            this.checkStartup.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkStartup.CheckBox.TabIndex = 0;
+            this.checkStartup.Location = new System.Drawing.Point(0, 460);
+            this.checkStartup.Margin = new System.Windows.Forms.Padding(0);
+            this.checkStartup.Name = "checkStartup";
+            this.checkStartup.Size = new System.Drawing.Size(442, 30);
+            this.checkStartup.TabIndex = 39;
+            this.checkStartup.Text = "Run when Windows starts";
+            // 
+            // checkStartMinimized
+            // 
+            // 
+            // 
+            // 
+            this.checkStartMinimized.CheckBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkStartMinimized.CheckBox.Location = new System.Drawing.Point(0, 0);
+            this.checkStartMinimized.CheckBox.Margin = new System.Windows.Forms.Padding(0);
+            this.checkStartMinimized.CheckBox.Name = "";
+            this.checkStartMinimized.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkStartMinimized.CheckBox.TabIndex = 0;
+            this.checkStartMinimized.Location = new System.Drawing.Point(0, 490);
+            this.checkStartMinimized.Margin = new System.Windows.Forms.Padding(0);
+            this.checkStartMinimized.Name = "checkStartMinimized";
+            this.checkStartMinimized.Size = new System.Drawing.Size(442, 30);
+            this.checkStartMinimized.TabIndex = 41;
+            this.checkStartMinimized.Text = "Start minimized to tray";
+            this.toolTip.SetToolTip(this.checkStartMinimized, "With this option enabled, the RSTK window will not be shown when the application\r" +
+        "\nis launched, and will instead be immediately minimized to the system task tray." +
+        "");
+            // 
+            // checkAutoHide
+            // 
+            // 
+            // 
+            // 
+            this.checkAutoHide.CheckBox.Checked = true;
+            this.checkAutoHide.CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkAutoHide.CheckBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkAutoHide.CheckBox.Location = new System.Drawing.Point(0, 0);
+            this.checkAutoHide.CheckBox.Margin = new System.Windows.Forms.Padding(0);
+            this.checkAutoHide.CheckBox.Name = "";
+            this.checkAutoHide.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkAutoHide.CheckBox.TabIndex = 0;
+            this.checkAutoHide.Location = new System.Drawing.Point(0, 520);
+            this.checkAutoHide.Margin = new System.Windows.Forms.Padding(0);
+            this.checkAutoHide.Name = "checkAutoHide";
+            this.checkAutoHide.Size = new System.Drawing.Size(442, 30);
+            this.checkAutoHide.TabIndex = 40;
+            this.checkAutoHide.Text = "Hide while Rocksmith is running";
+            this.toolTip.SetToolTip(this.checkAutoHide, "With this option enabled, RSTK will minimize itself Rocksmith is launched, and wi" +
+        "ll restore itself\r\nwhen Rocksmith exits (if RSTK was not already hidden when Roc" +
+        "ksmith was launched).");
+            // 
+            // panStatus
+            // 
+            this.panStatus.Controls.Add(this.lblStatus);
+            this.panStatus.Controls.Add(this.pbStatus);
+            this.panStatus.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panStatus.Location = new System.Drawing.Point(10, 10);
+            this.panStatus.Margin = new System.Windows.Forms.Padding(0, 0, 0, 20);
+            this.panStatus.Name = "panStatus";
+            this.panStatus.Size = new System.Drawing.Size(134, 157);
+            this.panStatus.TabIndex = 29;
+            // 
+            // lblAbout
+            // 
+            this.lblAbout.Accent = ((uint)(0u));
+            this.lblAbout.AccentMode = true;
+            this.lblAbout.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.lblAbout.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.lblAbout.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblAbout.Location = new System.Drawing.Point(10, 809);
+            this.lblAbout.Margin = new System.Windows.Forms.Padding(0);
+            this.lblAbout.Name = "lblAbout";
+            this.lblAbout.Size = new System.Drawing.Size(134, 24);
+            this.lblAbout.TabIndex = 102;
+            this.lblAbout.Text = "About";
+            this.lblAbout.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblAbout.Click += new System.EventHandler(this.lblAbout_Click);
+            // 
+            // toolTip
+            // 
+            this.toolTip.AutomaticDelay = 5000;
+            this.toolTip.AutoPopDelay = 32767;
+            this.toolTip.InitialDelay = 150;
+            this.toolTip.ReshowDelay = 1000;
+            this.toolTip.ShowAlways = true;
+            // 
             // RSTKForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(837, 774);
+            this.ClientSize = new System.Drawing.Size(1021, 843);
             this.Controls.Add(this.splitter);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "RSTKForm";
+            this.Opacity = 0D;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Rocksmith Tookit";
             ((System.ComponentModel.ISupportInitialize)(this.pbStatus)).EndInit();
@@ -576,9 +669,9 @@
             this.panRocksmithPath.ResumeLayout(false);
             this.panRocksmithPath.PerformLayout();
             this.flowLayoutPanel.ResumeLayout(false);
-            this.panStatus.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.trackLatencyBuffer.TrackBar)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackMaxOutputBufferSize.TrackBar)).EndInit();
+            this.panStatus.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -615,6 +708,10 @@
         private Marzersoft.Themes.ThemedLabel themedLabel2;
         private System.Windows.Forms.Panel panRocksmithPath;
         private CheckBoxRow checkDumpAudioLog;
+        private CheckBoxRow checkStartup;
+        private CheckBoxRow checkAutoHide;
+        private CheckBoxRow checkStartMinimized;
+        private CheckBoxRow checkCycleDisplays;
     }
 }
 
