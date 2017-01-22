@@ -1,13 +1,9 @@
 ﻿using Marzersoft;
 using Marzersoft.Themes;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace RSTK
@@ -66,6 +62,10 @@ namespace RSTK
         }
         private bool showWarning = false;
 
+        protected const int IconWidth = 30;
+        protected const int TextWidth = 230;
+        protected const float DisabledAlpha = 0.3f;
+
         /////////////////////////////////////////////////////////////////////
         // CONSTRUCTOR
         /////////////////////////////////////////////////////////////////////
@@ -83,7 +83,7 @@ namespace RSTK
             Controls.Add(panContents = new Panel());
             panContents.Margin = new Padding(0);
             panContents.Padding = new Padding(0);
-            panContents.Bounds = Rectangle.FromLTRB(185, 0, Width, Height);
+            panContents.Bounds = Rectangle.FromLTRB(IconWidth + TextWidth + 5, 0, Width, Height);
             panContents.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             panContents.TabStop = true;
 
@@ -122,11 +122,11 @@ namespace RSTK
                         {
                             ColorMatrix cm = new ColorMatrix();
                             if (!Enabled)
-                                cm = cm.SetAlpha(0.5f);
+                                cm = cm.SetAlpha(DisabledAlpha);
                             ia.SetColorMatrix(cm);
 
                             g.DrawImage(image,
-                                new Rectangle(15 - image.Width / 2, Height / 2 - image.Height / 2,
+                                new Rectangle((IconWidth / 2) - image.Width / 2, Height / 2 - image.Height / 2,
                                 image.Width, image.Height),
                                 0, 0, image.Width, image.Height,
                                 GraphicsUnit.Pixel, ia);
@@ -142,8 +142,8 @@ namespace RSTK
                         sf.LineAlignment = StringAlignment.Center;
                         sf.Trimming = StringTrimming.EllipsisWord;
                         g.DrawString(text, Font,
-                            Color.FromArgb(Enabled ? 255 : 120, ForeColor),
-                            new Rectangle(30, 0, 150, Height), sf);
+                            Color.FromArgb(Enabled ? 255 : DisabledAlpha.Project(0,255), ForeColor),
+                            new Rectangle(IconWidth, 0, TextWidth, Height), sf);
                     }
                 }
             });
@@ -166,6 +166,16 @@ namespace RSTK
             Category("Settings Row")]
         public ComboBox ComboBox { get; private set; }
 
+        /// <summary>
+        /// Alias for ComboBox.SelectedIndex.
+        /// </summary>
+        [Browsable(true), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int SelectedIndex
+        {
+            get { return ComboBox.SelectedIndex; }
+            set { ComboBox.SelectedIndex = value; }
+        }
+
         protected override void Initialize(Panel contents)
         {
             contents.Controls.Add(ComboBox = new ThemedComboBox());
@@ -173,6 +183,11 @@ namespace RSTK
             ComboBox.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
             PositionControl(contents, null);
             contents.SizeChanged += PositionControl;
+            ComboBox.MouseWheel += (s, e) =>
+            {
+                if (!ComboBox.DroppedDown)
+                    ((HandledMouseEventArgs)e).Handled = true;
+            };
         }
 
         private void PositionControl(object sender, EventArgs args)
@@ -212,16 +227,30 @@ namespace RSTK
         }
         private string valueFormat = "{0}";
 
+        /// <summary>
+        /// Alias for TrackBar.Value.
+        /// </summary>
+        [Browsable(true), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int Value
+        {
+            get { return TrackBar.Value; }
+            set { TrackBar.Value = value; }
+        }
+
         protected override void Initialize(Panel contents)
         {
             contents.Controls.Add(TrackBar = new TrackBar());
             TrackBar.Margin = new Padding(0);
             TrackBar.AutoSize = false;
-            TrackBar.Bounds = Rectangle.FromLTRB(50, 0, contents.ClientRectangle.Width, contents.ClientRectangle.Height);
+            TrackBar.Bounds = new Rectangle(50, 0, contents.ClientRectangle.Width-50, contents.ClientRectangle.Height);
             TrackBar.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             TrackBar.ValueChanged += (s, e) =>
             {
                 contents.Invalidate(new Rectangle(0, 0, 50, contents.ClientRectangle.Height));
+            };
+            TrackBar.MouseWheel += (s, e) =>
+            {
+                ((HandledMouseEventArgs)e).Handled = true;
             };
 
             contents.Paint += (s, e) =>
@@ -244,7 +273,7 @@ namespace RSTK
                         sf.LineAlignment = StringAlignment.Center;
                         sf.Trimming = StringTrimming.None;
                         g.DrawString(text, Font,
-                            Color.FromArgb(contents.Parent.Enabled ? 255 : 120, ForeColor),
+                            Color.FromArgb(contents.Parent.Enabled ? 255 : DisabledAlpha.Project(0, 255), ForeColor),
                             new Rectangle(0, 0, 50, contents.ClientRectangle.Height), sf);
                     }
                 });
@@ -264,6 +293,16 @@ namespace RSTK
             Category("Settings Row")]
         public CheckBox CheckBox { get; private set; }
 
+        /// <summary>
+        /// Alias for CheckBox.Checked.
+        /// </summary>
+        [Browsable(true), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool Checked
+        {
+            get { return CheckBox.Checked; }
+            set { CheckBox.Checked = value; }
+        }
+
         protected override void Initialize(Panel contents)
         {
             contents.Controls.Add(CheckBox = new CheckBox());
@@ -280,8 +319,8 @@ namespace RSTK
     /// </summary>
     public class TextRow : SettingsRow
     {
-        private Label lblValue;
-        
+        private Panel contents;
+
         /// <summary>
         /// Text displayed in the body of the control.
         /// </summary>
@@ -291,18 +330,39 @@ namespace RSTK
             Category("Settings Row")]
         public string Value
         {
-            get { return lblValue.Text; }
-            set { lblValue.Text = value; }
+            get { return valueText; }
+            set
+            {
+                if ((value = (value ?? "").Trim()).Equals(valueText))
+                    return;
+                valueText = value;
+                contents.Invalidate();
+            }
         }
+        private string valueText = "";
 
         protected override void Initialize(Panel contents)
         {
-            contents.Controls.Add(lblValue = new Label());
-            lblValue.AutoSize = false;
-            lblValue.TextAlign = ContentAlignment.MiddleLeft;
-            lblValue.Margin = new Padding(0);
-            lblValue.Padding = new Padding(0);
-            lblValue.Dock = DockStyle.Fill;
+            this.contents = contents;
+
+            contents.Paint += (s, e) =>
+            {
+                if (valueText.Length == 0)
+                    return;
+
+                e.Graphics.AsQuality(GraphicsQuality.High, (g) =>
+                {
+                    using (var sf = new StringFormat())
+                    {
+                        sf.Alignment = StringAlignment.Near;
+                        sf.LineAlignment = StringAlignment.Center;
+                        sf.Trimming = StringTrimming.None;
+                        g.DrawString(valueText, Font,
+                            Color.FromArgb(contents.Parent.Enabled ? 255 : DisabledAlpha.Project(0, 255), ForeColor),
+                            contents.ClientRectangle, sf);
+                    }
+                });
+            };
         }
     }
 }
