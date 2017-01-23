@@ -38,7 +38,10 @@ namespace RSTK
                 if ((value = (value ?? "").Trim()).Equals(text))
                     return;
                 text = value;
-                Invalidate(new Rectangle(30, 0, 150, Height));
+                if (IsDesignMode)
+                    Refresh();
+                else
+                    Invalidate(new Rectangle(30, 0, 150, Height));
             }
         }
         private string text = "";
@@ -169,7 +172,7 @@ namespace RSTK
         /// <summary>
         /// Alias for ComboBox.SelectedIndex.
         /// </summary>
-        [Browsable(true), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int SelectedIndex
         {
             get { return ComboBox.SelectedIndex; }
@@ -222,7 +225,10 @@ namespace RSTK
                 if ((value = (value ?? "").Trim()).Equals(valueFormat))
                     return;
                 valueFormat = value;
-                TrackBar.Parent.Invalidate(new Rectangle(0, 0, 50, TrackBar.Parent.ClientRectangle.Height));
+                if (IsDesignMode)
+                    Refresh();
+                else
+                    TrackBar.Parent.Invalidate(new Rectangle(0, 0, 50, TrackBar.Parent.ClientRectangle.Height));
             }
         }
         private string valueFormat = "{0}";
@@ -230,7 +236,9 @@ namespace RSTK
         /// <summary>
         /// Alias for TrackBar.Value.
         /// </summary>
-        [Browsable(true), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(true),
+            DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
+            DefaultValue(0)]
         public int Value
         {
             get { return TrackBar.Value; }
@@ -246,7 +254,10 @@ namespace RSTK
             TrackBar.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             TrackBar.ValueChanged += (s, e) =>
             {
-                contents.Invalidate(new Rectangle(0, 0, 50, contents.ClientRectangle.Height));
+                if (IsDesignMode)
+                    Refresh();
+                else
+                    contents.Invalidate(new Rectangle(0, 0, 50, contents.ClientRectangle.Height));
             };
             TrackBar.MouseWheel += (s, e) =>
             {
@@ -296,7 +307,9 @@ namespace RSTK
         /// <summary>
         /// Alias for CheckBox.Checked.
         /// </summary>
-        [Browsable(true), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(true),
+            DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
+            DefaultValue(false)]
         public bool Checked
         {
             get { return CheckBox.Checked; }
@@ -336,7 +349,10 @@ namespace RSTK
                 if ((value = (value ?? "").Trim()).Equals(valueText))
                     return;
                 valueText = value;
-                contents.Invalidate();
+                if (IsDesignMode)
+                    Refresh();
+                else
+                    contents.Invalidate();
             }
         }
         private string valueText = "";
