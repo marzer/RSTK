@@ -123,9 +123,6 @@
   <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>123, 11</value>
   </metadata>
-  <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>123, 11</value>
-  </metadata>
   <data name="cbFullscreenMode.ToolTip" xml:space="preserve">
     <value>Windowed: Runs in a regular window.
 
@@ -138,7 +135,7 @@ Windowed modes can be helpful if you have multiple monitors and want Rocksmith 2
 fullscreen on one monitor while maintaining regular use of the other monitors.</value>
   </data>
   <data name="checkEmulateFullscreen.ToolTip" xml:space="preserve">
-    <value>Off (unless... see below).
+    <value>Recommended setting: Off (unless... see below).
 
 On newer PC's (particularly those with Windows 10), Rocksmith appears to have
 difficulty managing the device state changes when attempting to enter fullscreen mode,
@@ -155,7 +152,7 @@ this leads to some serious performance issues.
 **Requires administrative permissions**</value>
   </data>
   <data name="checkCycleDisplays.ToolTip" xml:space="preserve">
-    <value>Off (unless you get the 'black screen' problem).
+    <value>Recommended setting: Off (unless you get the 'black screen' problem).
 
 When in ExclusiveFullscreen mode on newer PC's (particularly those with Windows 10),
 Rocksmith can cause the primary display to become locked in an invalid state when the
