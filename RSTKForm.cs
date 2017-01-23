@@ -144,6 +144,16 @@ namespace RSTK
                 App.Config.User.Flush();
             };
 
+            //cycle displays on exit
+            checkExitWhenRocksmithTerminated.Checked = App.Config.User.Get("exit_on_terminate", false);
+            checkExitWhenRocksmithTerminated.ShowWarningIcon = checkExitWhenRocksmithTerminated.Checked;
+            checkExitWhenRocksmithTerminated.CheckBox.CheckedChanged += (s, e) =>
+            {
+                checkExitWhenRocksmithTerminated.ShowWarningIcon = checkExitWhenRocksmithTerminated.Checked;
+                App.Config.User.Set("exit_on_terminate", checkExitWhenRocksmithTerminated.Checked);
+                App.Config.User.Flush();
+            };
+
             //launch buttons
             disabledWhileRunning.Add(panLaunchButtons);
 
@@ -349,12 +359,13 @@ namespace RSTK
                             Thread.Sleep(250);
 
                             //disable all
+                            List<string> successfullyDisabledAdapters = new List<string>();
                             foreach (var displayAdapter in displayAdapters)
                             {
-                                //Thread.Sleep(250);
                                 try
                                 {
                                     Devices.DisableDevice(Devices.ClassGuid_DisplayAdapters, displayAdapter);
+                                    successfullyDisabledAdapters.Add(displayAdapter);
                                 }
                                 catch (Exception ex)
                                 {
@@ -367,9 +378,8 @@ namespace RSTK
                             }
 
                             //enable all
-                            foreach (var displayAdapter in displayAdapters)
+                            foreach (var displayAdapter in successfullyDisabledAdapters)
                             {
-                                //Thread.Sleep(250);
                                 try
                                 {
                                     Devices.EnableDevice(Devices.ClassGuid_DisplayAdapters, displayAdapter);
@@ -384,6 +394,22 @@ namespace RSTK
                                 }
                             }
                         }
+                    }
+
+                    //exit if user has setting applied
+                    if (checkExitWhenRocksmithTerminated.Checked && rs.RunningTime >= 30.0)
+                    {
+                        ThreadPool.QueueUserWorkItem((state) =>
+                        {
+                            Thread.Sleep(500);
+                            this.Execute(() =>
+                            {
+                                HideOnClose = false;
+                                PreventUserClose = false;
+                                Close();
+                            });
+                        });
+                        return;
                     }
 
                     //re-enable controls
