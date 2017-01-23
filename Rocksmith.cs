@@ -101,12 +101,16 @@ namespace RSTK
                 process = value;
                 if (old != null)
                 {
+                    lastRunningTime = runningTimer.Seconds;
                     old.Dispose();
                     Terminated?.Invoke(this);
                 }
 
                 if (process != null)
+                {
+                    runningTimer.Reset();
                     Running?.Invoke(this);
+                }
             }
         }
         private Process process;
@@ -414,8 +418,26 @@ namespace RSTK
             }
         }
 
+        /// <summary>
+        /// Remaining duration of high-frequency polling period.
+        /// </summary>
         private volatile int highFrequencyPollMilliseconds = 0;
+
+        /// <summary>
+        /// Directory watcher for monitoring Rocksmith.ini changes.
+        /// </summary>
         private readonly FileSystemWatcher directoryWatcher;
+
+        /// <summary>
+        /// Amount of time, in seconds, rocksmith has been running for.
+        /// If Rocksmith is not running, returns the length of the most recent session.
+        /// </summary>
+        public double RunningTime
+        {
+            get { return process != null ? runningTimer.Seconds : lastRunningTime; }
+        }
+        private readonly Marzersoft.Timer runningTimer = new Marzersoft.Timer();
+        private double lastRunningTime = 0.0;
 
         /////////////////////////////////////////////////////////////////////
         // CONSTRUCTION/INITIALIZATION/DESTRUCTION
@@ -558,10 +580,10 @@ namespace RSTK
                 if (process.HasExited)
                 {
                     Logger.I("Rocksmith[{0}] has exited.", GameProcess.Id);
-                    GameProcess = null; //fires events
+                    GameProcess = null; //property fires events
                 }
             }
-            if (GameProcess != null)
+            if (process != null)
             {
                 highFrequencyPollMilliseconds = 0;
                 return;
@@ -569,8 +591,6 @@ namespace RSTK
 
             //get processes
             var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(GamePath));
-            //var processes = Process.GetProcesses();
-            //if (processes.Count() == 0)
             if (processes.Length == 0)
             {
                 GameProcess = null;
