@@ -225,18 +225,6 @@ namespace RSTK
                 else
                     BringToFront();
                 Opacity = 1.0;
-
-                //show message if not in admin mode
-                /*
-                if (!App.IsAdministrator)
-                {
-                    Logger.WarningMessage(this, "Oh my, it appears you're running RSTK as a regular user." +
-                        "\r\n\r\nRSTK requires elevated permissions to monitor the state of the Rocksmith process " +
-                        "(and potentially more, depending on your system setup)." +
-                        "\r\n\r\nFor best results (and less unpredictable weirdness), consider relaunching RSTK " +
-                        "with elevated permissions (\"Run as Administrator\").");
-                }
-                */
             });
         }
 
