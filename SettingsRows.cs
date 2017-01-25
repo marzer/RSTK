@@ -21,7 +21,6 @@ namespace RSTK
         public readonly bool IsDesignMode;
 
         private Panel panContents;
-        private static Image image;
 
         /// <summary>
         /// Text displayed to the left of the control.
@@ -47,25 +46,25 @@ namespace RSTK
         private string text = "";
 
         /// <summary>
-        /// Is the control in warning mode?
+        /// Icon shown on the control's left edge.
         /// </summary>
         [Browsable(false),
             DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool ShowWarningIcon
+        public Image Image
         {
-            get { return showWarning; }
+            get { return image; }
             set
             {
-                if (showWarning != value)
+                if (image != value)
                 {
-                    showWarning = value;
+                    image = value;
                     Invalidate(new Rectangle(0, 0, 30, Height));
                 }
             }
         }
-        private bool showWarning = false;
+        private Image image = null;
 
-        protected const int IconWidth = 30;
+        protected const int ImageWidth = 30;
         protected const int TextWidth = 230;
         protected const float DisabledAlpha = 0.3f;
 
@@ -86,7 +85,7 @@ namespace RSTK
             Controls.Add(panContents = new Panel());
             panContents.Margin = new Padding(0);
             panContents.Padding = new Padding(0);
-            panContents.Bounds = Rectangle.FromLTRB(IconWidth + TextWidth + 5, 0, Width, Height);
+            panContents.Bounds = Rectangle.FromLTRB(ImageWidth + TextWidth + 5, 0, Width, Height);
             panContents.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             panContents.TabStop = true;
 
@@ -110,30 +109,25 @@ namespace RSTK
         {
             base.OnPaint(e);
 
-            if (!((showWarning && !IsDesignMode) || text.Length > 0))
+            if (!((image != null && !IsDesignMode) || text.Length > 0))
                 return;
 
             e.Graphics.AsQuality(GraphicsQuality.High, (g) =>
             {
-                if (showWarning && !IsDesignMode)
+                if (image != null && !IsDesignMode)
                 {
-                    if (image == null)
-                        image = App.Images.Resource("warning_24", App.Assembly);
-                    if (image != null)
+                    using (ImageAttributes ia = new ImageAttributes())
                     {
-                        using (ImageAttributes ia = new ImageAttributes())
-                        {
-                            ColorMatrix cm = new ColorMatrix();
-                            if (!Enabled)
-                                cm = cm.SetAlpha(DisabledAlpha);
-                            ia.SetColorMatrix(cm);
+                        ColorMatrix cm = new ColorMatrix();
+                        if (!Enabled)
+                            cm = cm.SetAlpha(DisabledAlpha);
+                        ia.SetColorMatrix(cm);
 
-                            g.DrawImage(image,
-                                new Rectangle((IconWidth / 2) - image.Width / 2, Height / 2 - image.Height / 2,
-                                image.Width, image.Height),
-                                0, 0, image.Width, image.Height,
-                                GraphicsUnit.Pixel, ia);
-                        }
+                        g.DrawImage(image,
+                            new Rectangle((ImageWidth / 2) - image.Width / 2, Height / 2 - image.Height / 2,
+                            image.Width, image.Height),
+                            0, 0, image.Width, image.Height,
+                            GraphicsUnit.Pixel, ia);
                     }
                 }
 
@@ -146,7 +140,7 @@ namespace RSTK
                         sf.Trimming = StringTrimming.EllipsisWord;
                         g.DrawString(text, Font,
                             Color.FromArgb(Enabled ? 255 : DisabledAlpha.Project(0,255), ForeColor),
-                            new Rectangle(IconWidth, 0, TextWidth, Height), sf);
+                            new Rectangle(ImageWidth, 0, TextWidth, Height), sf);
                     }
                 }
             });
