@@ -142,6 +142,9 @@
   <data name="steam_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\steam_24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="uac_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\uac-24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="warning_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Warning-Message-24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
