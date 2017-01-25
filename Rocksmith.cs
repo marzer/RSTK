@@ -94,13 +94,15 @@ namespace RSTK
             get { return process; }
             set
             {
-                if (process == value)
+                if (process == value
+                    || (process != null && value != null && process.Id == value.Id))
                     return;
 
                 var old = process;
                 process = value;
                 if (old != null)
                 {
+                    Logger.I("Rocksmith[{0}] exited.", old.Id);
                     lastRunningTime = runningTimer.Seconds;
                     old.Dispose();
                     Terminated?.Invoke(this);
@@ -108,8 +110,10 @@ namespace RSTK
 
                 if (process != null)
                 {
+                    Logger.I("Rocksmith[{0}] running.", process.Id);
                     runningTimer.Reset();
                     Running?.Invoke(this);
+                    highFrequencyPollMilliseconds = 0;
                 }
             }
         }
@@ -448,7 +452,7 @@ namespace RSTK
             //paths
             if ((gameExecutablePath ?? "").Trim().Length == 0)
                 throw new ArgumentOutOfRangeException("gameExecutablePath", "cannot be blank");
-            if (!File.Exists(GamePath = Path.GetFullPath(gameExecutablePath)))
+            if (!File.Exists(GamePath = gameExecutablePath.ExpandPath()))
                 throw new FileNotFoundException("game executable not found", GamePath);
             var path = GamePath.ToLower();
             if (!Path.HasExtension(path) || !Path.GetExtension(path).Equals(".exe"))
@@ -508,18 +512,11 @@ namespace RSTK
                                 break;
                         }
 
-                        //if the game just exited, refresh config one last time
-                        //if (wasRunning)
-                          //  ReadConfig();
-
                         continue;
                     }
 
-                    //refresh ini if the game was just launched
-                    //ReadConfig();
-
                     //emulated fullscreen
-                    if (fullscreenMode == FullscreenModes.Windowed)
+                    if (fullscreenMode == FullscreenModes.Windowed && App.IsAdministrator)
                     {
                         if (emulatedFullscreen)
                         {
@@ -547,7 +544,7 @@ namespace RSTK
                 }
 
                 //revert emulated fullscreen on exit
-                if (fullscreenMode == FullscreenModes.Windowed)
+                if (fullscreenMode == FullscreenModes.Windowed && App.IsAdministrator)
                     RevertEmulatedFullscreen();
             });
             thread.IsBackground = false;
@@ -556,7 +553,7 @@ namespace RSTK
 
         private void RevertEmulatedFullscreen()
         {
-            if (GameProcess == null || emulatedSizeDelta.IsEmpty)
+            if (process == null || emulatedSizeDelta.IsEmpty)
                 return;
 
             WindowStyles = WindowStyles.MinimizeBox | WindowStyles.SystemMenu | WindowStyles.Caption
@@ -572,21 +569,19 @@ namespace RSTK
 
         private void RefreshProcess()
         {
-            //refresh existing process
-            if (process != null)
+            //administrators can access all process info,
+            //so can simply refresh the existing instance
+            if (App.IsAdministrator)
             {
-                if (!process.HasExited)
-                    process.Refresh();
-                if (process.HasExited)
+                if (process != null)
                 {
-                    Logger.I("Rocksmith[{0}] has exited.", GameProcess.Id);
-                    GameProcess = null; //property fires events
+                    if (!process.HasExited)
+                        process.Refresh();
+                    if (process.HasExited)
+                        GameProcess = null; //property fires events
                 }
-            }
-            if (process != null)
-            {
-                highFrequencyPollMilliseconds = 0;
-                return;
+                if (process != null)
+                    return;
             }
 
             //get processes
@@ -597,23 +592,28 @@ namespace RSTK
                 return;
             }
 
-            //get rocksmith process
-            var path = GamePath.ToLower();
-            GameProcess = processes.Where((p) =>
+            //update rocksmith process
+            if (App.IsAdministrator)
             {
-                try
-                { 
-                    return p.MainWindowHandle != IntPtr.Zero
-                    && !p.HasExited
-                    && p.MainModule != null
-                    && p.MainModule.FileName.ToLower().Equals(path);
-                } catch (Exception) { return false; }
-            }).FirstOrDefault();
+                GameProcess = processes.Where((p) =>
+                {
+                    try
+                    {
+                        return !p.HasExited
+                        && p.MainWindowHandle != IntPtr.Zero
+                        && p.MainModule != null
+                        && p.MainModule.FileName.EqualPath(GamePath);
+                    }
+                    catch (Exception) { return false; }
+                }).FirstOrDefault();
+            }
+            else
+                GameProcess = processes.FirstOrDefault();
 
             //cleanup
             foreach (var p in processes)
-                if (p != GameProcess)
-                    p.Dispose();
+            if (p != process)
+                p.Dispose();
         }
 
         /////////////////////////////////////////////////////////////////////
@@ -703,7 +703,7 @@ namespace RSTK
 
             //write to disk
             var parser = new FileIniDataParser();
-            parser.WriteFile(ConfigPath, ini, Encoding.GetEncoding(1252));//new UTF8Encoding(false));
+            parser.WriteFile(ConfigPath, ini, Encoding.GetEncoding(1252));
         }
 
 
