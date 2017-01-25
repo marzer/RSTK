@@ -61,11 +61,14 @@ namespace RSTK
 
             //emulated fullscreen in windowed mode
             checkEmulateFullscreen.Checked = App.Config.User.Get("emulated_fullscreen", false);
+            checkEmulateFullscreen.Image = checkEmulateFullscreen.Checked
+                ? App.Images.Resource(!App.IsAdministrator ? "uac_24" : "warning_24", App.Assembly) : null;
             checkEmulateFullscreen.CheckBox.CheckedChanged += (s, e) =>
             {
                 if (rocksmith != null)
-                    rocksmith.EmulateFullscreenWhenWindowed = checkEmulateFullscreen.Checked && App.IsAdministrator;
-                checkEmulateFullscreen.ShowWarningIcon = checkEmulateFullscreen.Checked;
+                    rocksmith.EmulateFullscreenWhenWindowed = checkEmulateFullscreen.Checked;
+                checkEmulateFullscreen.Image = checkEmulateFullscreen.Checked
+                    ? App.Images.Resource(!App.IsAdministrator ? "uac_24" : "warning_24", App.Assembly) : null;
                 App.Config.User.Set("emulated_fullscreen", checkEmulateFullscreen.Checked);
                 App.Config.User.Flush();
             };
@@ -73,7 +76,7 @@ namespace RSTK
             //exclusive mode
             checkExclusiveMode.CheckBox.CheckedChanged += (s, e) =>
             {
-                checkExclusiveMode.ShowWarningIcon = !checkExclusiveMode.Checked;
+                checkExclusiveMode.Image = !checkExclusiveMode.Checked ? App.Images.Resource("warning_24", App.Assembly) : null;
                 RefreshEffectiveLatency();
                 SaveConfigChanges();
             };
@@ -82,7 +85,7 @@ namespace RSTK
             //win32ultralowlatency
             checkUltraLowLatencyMode.CheckBox.CheckedChanged += (s, e) =>
             {
-                checkUltraLowLatencyMode.ShowWarningIcon = !checkUltraLowLatencyMode.Checked;
+                checkUltraLowLatencyMode.Image = !checkUltraLowLatencyMode.Checked ? App.Images.Resource("warning_24", App.Assembly) : null;
                 RefreshEffectiveLatency();
                 SaveConfigChanges();
             };
@@ -106,7 +109,7 @@ namespace RSTK
             //dump audio log
             checkDumpAudioLog.CheckBox.CheckedChanged += (s, e) =>
             {
-                checkDumpAudioLog.ShowWarningIcon = checkDumpAudioLog.CheckBox.Checked;
+                checkDumpAudioLog.Image = checkDumpAudioLog.Checked ? App.Images.Resource("warning_24", App.Assembly) : null;
                 SaveConfigChanges();
             };
             disabledWhileRunning.Add(checkDumpAudioLog);
@@ -136,20 +139,22 @@ namespace RSTK
 
             //cycle displays on exit
             checkCycleDisplays.Checked = App.Config.User.Get("cycle_displays", false);
-            checkCycleDisplays.ShowWarningIcon = checkCycleDisplays.Checked;
+            checkCycleDisplays.Image = checkCycleDisplays.Checked
+                ? App.Images.Resource(!App.IsAdministrator ? "uac_24" : "warning_24", App.Assembly) : null;
             checkCycleDisplays.CheckBox.CheckedChanged += (s, e) =>
             {
-                checkCycleDisplays.ShowWarningIcon = checkCycleDisplays.Checked;
+                checkCycleDisplays.Image = checkCycleDisplays.Checked
+                    ? App.Images.Resource(!App.IsAdministrator ? "uac_24" : "warning_24", App.Assembly) : null;
                 App.Config.User.Set("cycle_displays", checkCycleDisplays.Checked);
                 App.Config.User.Flush();
             };
 
             //cycle displays on exit
             checkExitWhenRocksmithTerminated.Checked = App.Config.User.Get("exit_on_terminate", false);
-            checkExitWhenRocksmithTerminated.ShowWarningIcon = checkExitWhenRocksmithTerminated.Checked;
+            checkExitWhenRocksmithTerminated.Image = checkExitWhenRocksmithTerminated.Checked ? App.Images.Resource("warning_24", App.Assembly) : null;
             checkExitWhenRocksmithTerminated.CheckBox.CheckedChanged += (s, e) =>
             {
-                checkExitWhenRocksmithTerminated.ShowWarningIcon = checkExitWhenRocksmithTerminated.Checked;
+                checkExitWhenRocksmithTerminated.Image = checkExitWhenRocksmithTerminated.Checked ? App.Images.Resource("warning_24", App.Assembly) : null;
                 App.Config.User.Set("exit_on_terminate", checkExitWhenRocksmithTerminated.Checked);
                 App.Config.User.Flush();
             };
@@ -237,13 +242,13 @@ namespace RSTK
             if (!checkUltraLowLatencyMode.Checked)
                 lat *= 1.5;
             lblEffectiveLatency.Value = string.Format("{0:0} ms", lat);
-            lblEffectiveLatency.ShowWarningIcon = lat < 10.0 || lat > 75.0;
+            lblEffectiveLatency.Image = lat < 10.0 || lat > 75.0 ? App.Images.Resource("warning_24", App.Assembly) : null;
         }
 
         private void LatencyTrackBarValueChanged(object sender, EventArgs args)
         {
-            trackLatencyBuffer.ShowWarningIcon = !trackLatencyBuffer.TrackBar.Value.IsBetween(1, 4);
-            trackMaxOutputBufferSize.ShowWarningIcon = !trackMaxOutputBufferSize.TrackBar.Value.IsBetween(100, 400);
+            trackLatencyBuffer.Image = !trackLatencyBuffer.TrackBar.Value.IsBetween(1, 4) ? App.Images.Resource("warning_24", App.Assembly) : null;
+            trackMaxOutputBufferSize.Image = !trackMaxOutputBufferSize.TrackBar.Value.IsBetween(100, 400) ? App.Images.Resource("warning_24", App.Assembly) : null;
             RefreshEffectiveLatency();
             SaveConfigChanges();
         }
@@ -280,7 +285,7 @@ namespace RSTK
 
             //assign new instance
             rocksmith = newRocksmith;
-            rocksmith.EmulateFullscreenWhenWindowed =  checkEmulateFullscreen.Checked && App.IsAdministrator;
+            rocksmith.EmulateFullscreenWhenWindowed =  checkEmulateFullscreen.Checked;
             rocksmith.SetFastPollWindow(10.0);
 
             //sync controls with config
