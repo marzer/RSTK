@@ -7,6 +7,7 @@ using System.IO;
 using System.Drawing;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Marzersoft.Controls;
 
 namespace RSTK
 {
@@ -14,7 +15,7 @@ namespace RSTK
     {
         private Rocksmith rocksmith = null;
         private volatile bool running = false, readingConfig = false, showOnRocksmithExit = false;
-        private readonly Marzersoft.Timer lastLaunchClickTimer
+        private readonly Marzersoft.Timer lastLaunchTimer
             = new Marzersoft.Timer(-5.0);
         private readonly List<Control> disabledWhileRunning
             = new List<Control>();
@@ -159,6 +160,14 @@ namespace RSTK
                 App.Config.User.Flush();
             };
 
+            //launch from anywhere hotkey
+            checkLaunchAnywhere.Checked = App.Config.User.Get("launch_anywhere_hotkey", false);
+            checkLaunchAnywhere.CheckBox.CheckedChanged += (s, e) =>
+            {
+                App.Config.User.Set("launch_anywhere_hotkey", checkLaunchAnywhere.Checked);
+                App.Config.User.Flush();
+            };
+
             //launch buttons
             disabledWhileRunning.Add(panLaunchButtons);
 
@@ -221,6 +230,9 @@ namespace RSTK
             if ((path = App.Config.User.Get("path", "").Trim()).Length > 0
                 && File.Exists(path = path.Trim()))
                 SetRocksmithPath(Path.GetFullPath(path), false);
+
+            //global hotkey
+            RegisterHotkey(Keys.Control | Keys.Shift | Keys.R);
 
             //show/hide properly
             this.Execute(() =>
@@ -477,34 +489,32 @@ namespace RSTK
             }, false);
         }
 
+        private void LaunchRocksmith(bool viaSteam = true)
+        {
+            if (rocksmith == null || running || lastLaunchTimer.Seconds < 5.0)
+                return;
+            lastLaunchTimer.Reset();
+            rocksmith.SetFastPollWindow(10.0);
+            if (viaSteam)
+                Process.Start(rocksmith.SteamRunCommand);
+            else
+            {
+                ProcessStartInfo pi = new ProcessStartInfo();
+                pi.FileName = rocksmith.GamePath;
+                pi.WorkingDirectory = rocksmith.GameDirectory;
+                pi.UseShellExecute = true;
+                Process.Start(pi);
+            }
+        }
+
         private void btnLaunchSteam_Click(object sender, EventArgs e)
         {
-            if (rocksmith == null || running)
-                return;
-
-            if (lastLaunchClickTimer.Seconds < 5.0)
-                return;
-            lastLaunchClickTimer.Reset();
-            rocksmith.SetFastPollWindow(10.0);
-
-            Process.Start(rocksmith.SteamRunCommand);
+            LaunchRocksmith();
         }
 
         private void btnLaunch_Click(object sender, EventArgs e)
         {
-            if (rocksmith == null || running)
-                return;
-
-            if (lastLaunchClickTimer.Seconds < 5.0)
-                return;
-            lastLaunchClickTimer.Reset();
-            rocksmith.SetFastPollWindow(10);
-
-            ProcessStartInfo pi = new ProcessStartInfo();
-            pi.FileName = rocksmith.GamePath;
-            pi.WorkingDirectory = rocksmith.GameDirectory;
-            pi.UseShellExecute = true;
-            Process.Start(pi);
+            LaunchRocksmith(false);
         }
 
         private void flowLayoutPanel_Resize(object sender, EventArgs e)
@@ -558,6 +568,17 @@ namespace RSTK
         {
             base.OnVisibleChanged(e);
             showOnRocksmithExit = false;
+        }
+
+        protected override void OnHotkeyPress(HotkeyEventArgs args)
+        {
+            if (checkLaunchAnywhere.Checked && args.KeyData == (Keys.Control | Keys.Shift | Keys.R))
+            {
+                LaunchRocksmith();
+                args.Handled = true;
+                return;
+            }
+            base.OnHotkeyPress(args);
         }
     }
 }
