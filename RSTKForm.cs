@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Marzersoft.Controls;
+using System.Text.RegularExpressions;
 
 namespace RSTK
 {
@@ -21,7 +22,7 @@ namespace RSTK
             = new List<Control>();
         private readonly List<ToolStripItem> disabledWhileRunningToolStrip
             = new List<ToolStripItem>();
-        private ToolStripItem tsLaunch, tsLaunchSteam;
+        private ToolStripItem tsLaunch, tsLaunchSteam, tsOpenFolder;
 
         public RSTKForm()
         {
@@ -152,10 +153,12 @@ namespace RSTK
 
             //cycle displays on exit
             checkExitWhenRocksmithTerminated.Checked = App.Config.User.Get("exit_on_terminate", false);
-            checkExitWhenRocksmithTerminated.Image = checkExitWhenRocksmithTerminated.Checked ? App.Images.Resource("warning_24", App.Assembly) : null;
+            checkExitWhenRocksmithTerminated.Image
+                = checkExitWhenRocksmithTerminated.Checked ? App.Images.Resource("warning_24", App.Assembly) : null;
             checkExitWhenRocksmithTerminated.CheckBox.CheckedChanged += (s, e) =>
             {
-                checkExitWhenRocksmithTerminated.Image = checkExitWhenRocksmithTerminated.Checked ? App.Images.Resource("warning_24", App.Assembly) : null;
+                checkExitWhenRocksmithTerminated.Image
+                = checkExitWhenRocksmithTerminated.Checked ? App.Images.Resource("warning_24", App.Assembly) : null;
                 App.Config.User.Set("exit_on_terminate", checkExitWhenRocksmithTerminated.Checked);
                 App.Config.User.Flush();
             };
@@ -168,8 +171,28 @@ namespace RSTK
                 App.Config.User.Flush();
             };
 
+            //pre-launch command
+            tbLaunchCommand.Text = App.Config.User.Get("launch_commands", "").Trim();
+            tbLaunchCommand.Image
+                = tbLaunchCommand.Text.Trim().Length > 0 ? App.Images.Resource("warning_24", App.Assembly) : null;
+            tbLaunchCommand.TextBox.TextChanged += (s, e) =>
+            {
+                tbLaunchCommand.Image
+                    = tbLaunchCommand.Text.Trim().Length > 0 ? App.Images.Resource("warning_24", App.Assembly) : null;
+                App.Config.User.Set("launch_commands", tbLaunchCommand.Text.Trim());
+                App.Config.User.Flush();
+            };
+
             //launch buttons
             disabledWhileRunning.Add(panLaunchButtons);
+
+            //'cog' title bar button
+            var tb = new TitleBarButton(this);
+            tb.Image.Add(App.Images.Resource("settings_16", App.Assembly));
+            tb.Click += (b) =>
+            {
+                TrayIconMenu.Show(this.WindowToScreen(b.Bounds.BottomLeft()));
+            };
 
             //apply themes
             App.ThemeChanged += (t) =>
@@ -177,6 +200,7 @@ namespace RSTK
                 this.Execute(() =>
                 {
                     splitter.Panel2.BackColor = t.Controls.HighContrast.Colour;
+                    tbLaunchCommand.TextBox.Font = t.Monospaced.Regular;
                 }, false);
             };
             App.Theme = App.Themes["dark"];
@@ -207,17 +231,38 @@ namespace RSTK
             //set icon
             TrayIcon.Icon = Icon = App.Icons.Resource("rstk_waiting_icon", App.Assembly);
 
-            //tray menu items
-            tsLaunch = AddTrayIconMenuItem("Launch game");
-            tsLaunch.Visible = false;
-            tsLaunch.Image = App.Images.Resource("gamepad_24", "invert", App.Assembly);
-            tsLaunch.Click += btnLaunch_Click;
-            disabledWhileRunningToolStrip.Add(tsLaunch);
-            tsLaunchSteam = AddTrayIconMenuItem("Launch game via Steam");
-            tsLaunchSteam.Visible = false;
-            tsLaunchSteam.Image = App.Images.Resource("steam_24", "invert", App.Assembly);
-            tsLaunchSteam.Click += btnLaunchSteam_Click;
-            disabledWhileRunningToolStrip.Add(tsLaunchSteam);
+            //about menu icon
+            var icon = AddTrayIconMenuItem("About");
+            icon.Image = App.Images.Resource("info");
+            icon.Click += (s, ev) =>
+            {
+                "https://github.com/marzer/RSTK/".LaunchWebsite();
+            };
+            AddTrayIconMenuSeparator();
+
+            //open rocksmith directory in explorer
+            tsOpenFolder = icon = AddTrayIconMenuItem("Open Rocksmith directory");
+            icon.Visible = false;
+            icon.Image = App.Images.Resource("open");
+            icon.Click += (s, ev) =>
+            {
+                rocksmith.GameDirectory.OpenFolder();
+            };
+            disabledWhileRunningToolStrip.Add(icon);
+            
+            //launch game menu icon
+            tsLaunch = icon = AddTrayIconMenuItem("Launch game");
+            icon.Visible = false;
+            icon.Image = App.Images.Resource("gamepad_24", "invert", App.Assembly);
+            icon.Click += btnLaunch_Click;
+            disabledWhileRunningToolStrip.Add(icon);
+
+            //launch game via steam menu icon
+            tsLaunchSteam = icon = AddTrayIconMenuItem("Launch game via Steam");
+            icon.Visible = false;
+            icon.Image = App.Images.Resource("steam_24", "invert", App.Assembly);
+            icon.Click += btnLaunchSteam_Click;
+            disabledWhileRunningToolStrip.Add(icon);
 
             //check command line params
             string path = "";
@@ -253,7 +298,7 @@ namespace RSTK
                 lat *= 1.5;
             if (!checkUltraLowLatencyMode.Checked)
                 lat *= 1.5;
-            lblEffectiveLatency.Value = string.Format("{0:0} ms", lat);
+            lblEffectiveLatency.Text = string.Format("{0:0} ms", lat);
             lblEffectiveLatency.Image = lat < 10.0 || lat > 75.0 ? App.Images.Resource("warning_24", App.Assembly) : null;
         }
 
@@ -448,6 +493,7 @@ namespace RSTK
                 = panLaunchButtons.Visible
                 = tsLaunch.Visible
                 = tsLaunchSteam.Visible
+                = tsOpenFolder.Visible
                 = true;
             panRocksmithPath.Visible = false;
             lblStatus.Text = "Waiting for Rocksmith";
@@ -493,6 +539,37 @@ namespace RSTK
         {
             if (rocksmith == null || running || lastLaunchTimer.Seconds < 5.0)
                 return;
+
+            //pre-launch commands
+            var commands = tbLaunchCommand.Text
+                .NormalizeLineEndings("\n")
+                .Trim()
+                .Split(new char[]{'\n'}, StringSplitOptions.RemoveEmptyEntries);
+            if (commands.Length > 0)
+            {
+                for (int i = 0; i < commands.Length; ++i)
+                {
+                    var cmd = commands[i].Trim();
+                    if (cmd.Length == 0)
+                        continue;
+
+                    using (var process = new Process())
+                    {
+                        ProcessStartInfo si = new ProcessStartInfo();
+                        //si.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                        //si.CreateNoWindow = true;
+                        si.FileName = "cmd.exe";
+                        si.Arguments = string.Format("/c {0}", cmd);
+                        si.UseShellExecute = false;
+                        si.WorkingDirectory = rocksmith.GameDirectory;
+                        process.StartInfo = si;
+                        process.Start();
+                        process.WaitForExit();
+                    }
+                }
+            }
+
+            //launch rocksmith
             lastLaunchTimer.Reset();
             rocksmith.SetFastPollWindow(10.0);
             if (viaSteam)
@@ -532,11 +609,6 @@ namespace RSTK
         {
             btnLaunchSteam.Image = App.Images.Resource("steam_24",
                 (sender as Button).Enabled ? "" : "30% alpha", App.Assembly);
-        }
-
-        private void lblAbout_Click(object sender, EventArgs e)
-        {
-            "https://github.com/marzer/RSTK/".LaunchWebsite();
         }
 
         private void SaveConfigChanges()

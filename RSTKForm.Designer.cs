@@ -63,8 +63,8 @@
             this.checkLaunchAnywhere = new RSTK.CheckBoxRow();
             this.checkAutoHide = new RSTK.CheckBoxRow();
             this.checkExitWhenRocksmithTerminated = new RSTK.CheckBoxRow();
+            this.tbLaunchCommand = new RSTK.TextBoxRow();
             this.panStatus = new System.Windows.Forms.Panel();
-            this.lblAbout = new Marzersoft.Themes.ThemedLabel();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pbStatus)).BeginInit();
             this.panLaunchButtons.SuspendLayout();
@@ -86,7 +86,7 @@
             this.pbStatus.Location = new System.Drawing.Point(0, 0);
             this.pbStatus.Margin = new System.Windows.Forms.Padding(0);
             this.pbStatus.Name = "pbStatus";
-            this.pbStatus.Size = new System.Drawing.Size(116, 100);
+            this.pbStatus.Size = new System.Drawing.Size(92, 100);
             this.pbStatus.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbStatus.TabIndex = 2;
             this.pbStatus.TabStop = false;
@@ -98,7 +98,7 @@
             this.lblStatus.Location = new System.Drawing.Point(0, 100);
             this.lblStatus.Margin = new System.Windows.Forms.Padding(0);
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(116, 57);
+            this.lblStatus.Size = new System.Drawing.Size(92, 57);
             this.lblStatus.TabIndex = 1;
             this.lblStatus.Text = "Waiting for game path.";
             this.lblStatus.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -124,7 +124,7 @@
             this.btnRocksmithPath.FlatAppearance.BorderSize = 0;
             this.btnRocksmithPath.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRocksmithPath.Image = global::RSTK.Properties.Resources.open_16;
-            this.btnRocksmithPath.Location = new System.Drawing.Point(934, 35);
+            this.btnRocksmithPath.Location = new System.Drawing.Point(1078, 35);
             this.btnRocksmithPath.Margin = new System.Windows.Forms.Padding(0);
             this.btnRocksmithPath.Name = "btnRocksmithPath";
             this.btnRocksmithPath.Size = new System.Drawing.Size(26, 26);
@@ -141,7 +141,7 @@
             this.themedLabel3.Location = new System.Drawing.Point(0, 0);
             this.themedLabel3.Margin = new System.Windows.Forms.Padding(0);
             this.themedLabel3.Name = "themedLabel3";
-            this.themedLabel3.Size = new System.Drawing.Size(960, 30);
+            this.themedLabel3.Size = new System.Drawing.Size(1104, 30);
             this.themedLabel3.TabIndex = 25;
             this.themedLabel3.Text = "Rocksmith Location";
             // 
@@ -154,7 +154,7 @@
             this.tbRocksmithPath.Margin = new System.Windows.Forms.Padding(0);
             this.tbRocksmithPath.Name = "tbRocksmithPath";
             this.tbRocksmithPath.ReadOnly = true;
-            this.tbRocksmithPath.Size = new System.Drawing.Size(926, 20);
+            this.tbRocksmithPath.Size = new System.Drawing.Size(1070, 20);
             this.tbRocksmithPath.TabIndex = 1;
             // 
             // dlgBrowse
@@ -175,7 +175,7 @@
             this.btnLaunch.Margin = new System.Windows.Forms.Padding(0);
             this.btnLaunch.Name = "btnLaunch";
             this.btnLaunch.Padding = new System.Windows.Forms.Padding(0, 5, 0, 5);
-            this.btnLaunch.Size = new System.Drawing.Size(116, 70);
+            this.btnLaunch.Size = new System.Drawing.Size(92, 70);
             this.btnLaunch.TabIndex = 100;
             this.btnLaunch.Text = "Launch";
             this.btnLaunch.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -199,7 +199,7 @@
             this.btnLaunchSteam.Margin = new System.Windows.Forms.Padding(0);
             this.btnLaunchSteam.Name = "btnLaunchSteam";
             this.btnLaunchSteam.Padding = new System.Windows.Forms.Padding(0, 5, 0, 5);
-            this.btnLaunchSteam.Size = new System.Drawing.Size(116, 70);
+            this.btnLaunchSteam.Size = new System.Drawing.Size(92, 70);
             this.btnLaunchSteam.TabIndex = 101;
             this.btnLaunchSteam.Text = "Launch via Steam";
             this.btnLaunchSteam.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -217,7 +217,7 @@
             this.panLaunchButtons.Margin = new System.Windows.Forms.Padding(0);
             this.panLaunchButtons.Name = "panLaunchButtons";
             this.panLaunchButtons.Padding = new System.Windows.Forms.Padding(0, 20, 0, 0);
-            this.panLaunchButtons.Size = new System.Drawing.Size(116, 678);
+            this.panLaunchButtons.Size = new System.Drawing.Size(92, 747);
             this.panLaunchButtons.TabIndex = 28;
             this.panLaunchButtons.Visible = false;
             // 
@@ -239,10 +239,9 @@
             // 
             this.splitter.Panel2.Controls.Add(this.panLaunchButtons);
             this.splitter.Panel2.Controls.Add(this.panStatus);
-            this.splitter.Panel2.Controls.Add(this.lblAbout);
             this.splitter.Panel2.Padding = new System.Windows.Forms.Padding(10);
-            this.splitter.Size = new System.Drawing.Size(1117, 879);
-            this.splitter.SplitterDistance = 980;
+            this.splitter.Size = new System.Drawing.Size(1237, 924);
+            this.splitter.SplitterDistance = 1124;
             this.splitter.SplitterWidth = 1;
             this.splitter.TabIndex = 29;
             this.splitter.TabStop = false;
@@ -256,7 +255,7 @@
             this.panRocksmithPath.Controls.Add(this.btnRocksmithPath);
             this.panRocksmithPath.Location = new System.Drawing.Point(10, 10);
             this.panRocksmithPath.Name = "panRocksmithPath";
-            this.panRocksmithPath.Size = new System.Drawing.Size(960, 79);
+            this.panRocksmithPath.Size = new System.Drawing.Size(1104, 79);
             this.panRocksmithPath.TabIndex = 31;
             // 
             // flowLayoutPanel
@@ -284,11 +283,12 @@
             this.flowLayoutPanel.Controls.Add(this.checkLaunchAnywhere);
             this.flowLayoutPanel.Controls.Add(this.checkAutoHide);
             this.flowLayoutPanel.Controls.Add(this.checkExitWhenRocksmithTerminated);
+            this.flowLayoutPanel.Controls.Add(this.tbLaunchCommand);
             this.flowLayoutPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel.Location = new System.Drawing.Point(10, 124);
             this.flowLayoutPanel.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel.Name = "flowLayoutPanel";
-            this.flowLayoutPanel.Size = new System.Drawing.Size(960, 745);
+            this.flowLayoutPanel.Size = new System.Drawing.Size(1104, 790);
             this.flowLayoutPanel.TabIndex = 30;
             this.flowLayoutPanel.Visible = false;
             this.flowLayoutPanel.WrapContents = false;
@@ -308,6 +308,7 @@
             // 
             // cbResolution
             // 
+            this.cbResolution.Caption = "Resolution";
             // 
             // 
             // 
@@ -325,10 +326,10 @@
             this.cbResolution.Name = "cbResolution";
             this.cbResolution.Size = new System.Drawing.Size(442, 30);
             this.cbResolution.TabIndex = 27;
-            this.cbResolution.Text = "Resolution";
             // 
             // cbFullscreenMode
             // 
+            this.cbFullscreenMode.Caption = "Fullscreen mode";
             // 
             // 
             // 
@@ -346,11 +347,11 @@
             this.cbFullscreenMode.Name = "cbFullscreenMode";
             this.cbFullscreenMode.Size = new System.Drawing.Size(442, 30);
             this.cbFullscreenMode.TabIndex = 28;
-            this.cbFullscreenMode.Text = "Fullscreen mode";
             this.toolTip.SetToolTip(this.cbFullscreenMode, resources.GetString("cbFullscreenMode.ToolTip"));
             // 
             // checkEmulateFullscreen
             // 
+            this.checkEmulateFullscreen.Caption = "Emulate fullscreen";
             // 
             // 
             // 
@@ -366,11 +367,12 @@
             this.checkEmulateFullscreen.Name = "checkEmulateFullscreen";
             this.checkEmulateFullscreen.Size = new System.Drawing.Size(442, 30);
             this.checkEmulateFullscreen.TabIndex = 29;
-            this.checkEmulateFullscreen.Text = "Emulate fullscreen";
+            this.checkEmulateFullscreen.Text = "(only applies in Windowed mode)";
             this.toolTip.SetToolTip(this.checkEmulateFullscreen, resources.GetString("checkEmulateFullscreen.ToolTip"));
             // 
             // checkCycleDisplays
             // 
+            this.checkCycleDisplays.Caption = "Cycle displays when Rocksmith exits";
             // 
             // 
             // 
@@ -386,7 +388,7 @@
             this.checkCycleDisplays.Name = "checkCycleDisplays";
             this.checkCycleDisplays.Size = new System.Drawing.Size(442, 30);
             this.checkCycleDisplays.TabIndex = 42;
-            this.checkCycleDisplays.Text = "Cycle displays when Rocksmith exits";
+            this.checkCycleDisplays.Text = "(only applies in ExclusiveFullscreen mode)";
             this.toolTip.SetToolTip(this.checkCycleDisplays, resources.GetString("checkCycleDisplays.ToolTip"));
             // 
             // themedLabel1
@@ -403,6 +405,7 @@
             // 
             // checkExclusiveMode
             // 
+            this.checkExclusiveMode.Caption = "Exclusive mode";
             // 
             // 
             // 
@@ -419,11 +422,11 @@
             this.checkExclusiveMode.Name = "checkExclusiveMode";
             this.checkExclusiveMode.Size = new System.Drawing.Size(442, 30);
             this.checkExclusiveMode.TabIndex = 31;
-            this.checkExclusiveMode.Text = "Exclusive mode";
             this.toolTip.SetToolTip(this.checkExclusiveMode, resources.GetString("checkExclusiveMode.ToolTip"));
             // 
             // checkUltraLowLatencyMode
             // 
+            this.checkUltraLowLatencyMode.Caption = "Ultra-low latency mode";
             // 
             // 
             // 
@@ -440,17 +443,16 @@
             this.checkUltraLowLatencyMode.Name = "checkUltraLowLatencyMode";
             this.checkUltraLowLatencyMode.Size = new System.Drawing.Size(442, 30);
             this.checkUltraLowLatencyMode.TabIndex = 32;
-            this.checkUltraLowLatencyMode.Text = "Ultra-low latency mode";
             this.toolTip.SetToolTip(this.checkUltraLowLatencyMode, resources.GetString("checkUltraLowLatencyMode.ToolTip"));
             // 
             // trackLatencyBuffer
             // 
+            this.trackLatencyBuffer.Caption = "Latency buffer";
             this.trackLatencyBuffer.Location = new System.Drawing.Point(0, 260);
             this.trackLatencyBuffer.Margin = new System.Windows.Forms.Padding(0);
             this.trackLatencyBuffer.Name = "trackLatencyBuffer";
             this.trackLatencyBuffer.Size = new System.Drawing.Size(442, 30);
             this.trackLatencyBuffer.TabIndex = 33;
-            this.trackLatencyBuffer.Text = "Latency buffer";
             this.toolTip.SetToolTip(this.trackLatencyBuffer, resources.GetString("trackLatencyBuffer.ToolTip"));
             // 
             // 
@@ -470,12 +472,12 @@
             // 
             // trackMaxOutputBufferSize
             // 
+            this.trackMaxOutputBufferSize.Caption = "Max output buffer size";
             this.trackMaxOutputBufferSize.Location = new System.Drawing.Point(0, 290);
             this.trackMaxOutputBufferSize.Margin = new System.Windows.Forms.Padding(0);
             this.trackMaxOutputBufferSize.Name = "trackMaxOutputBufferSize";
             this.trackMaxOutputBufferSize.Size = new System.Drawing.Size(442, 30);
             this.trackMaxOutputBufferSize.TabIndex = 34;
-            this.trackMaxOutputBufferSize.Text = "Max output buffer size";
             this.toolTip.SetToolTip(this.trackMaxOutputBufferSize, resources.GetString("trackMaxOutputBufferSize.ToolTip"));
             // 
             // 
@@ -495,17 +497,18 @@
             // 
             // lblEffectiveLatency
             // 
+            this.lblEffectiveLatency.Caption = "Latency (estimated)";
             this.lblEffectiveLatency.Location = new System.Drawing.Point(0, 320);
             this.lblEffectiveLatency.Margin = new System.Windows.Forms.Padding(0);
             this.lblEffectiveLatency.Name = "lblEffectiveLatency";
             this.lblEffectiveLatency.Size = new System.Drawing.Size(442, 30);
             this.lblEffectiveLatency.TabIndex = 35;
             this.lblEffectiveLatency.TabStop = false;
-            this.lblEffectiveLatency.Text = "Latency (estimated)";
             this.toolTip.SetToolTip(this.lblEffectiveLatency, resources.GetString("lblEffectiveLatency.ToolTip"));
             // 
             // checkMicrophone
             // 
+            this.checkMicrophone.Caption = "Enable microphone";
             // 
             // 
             // 
@@ -520,12 +523,12 @@
             this.checkMicrophone.Name = "checkMicrophone";
             this.checkMicrophone.Size = new System.Drawing.Size(442, 30);
             this.checkMicrophone.TabIndex = 36;
-            this.checkMicrophone.Text = "Enable microphone";
             this.toolTip.SetToolTip(this.checkMicrophone, "Set this value to true to enable the use of voice microphone.\r\nThis is duplicated" +
         " in the Rocksmith 2014 menus.");
             // 
             // checkDumpAudioLog
             // 
+            this.checkDumpAudioLog.Caption = "Dump audio log";
             // 
             // 
             // 
@@ -540,7 +543,6 @@
             this.checkDumpAudioLog.Name = "checkDumpAudioLog";
             this.checkDumpAudioLog.Size = new System.Drawing.Size(442, 30);
             this.checkDumpAudioLog.TabIndex = 38;
-            this.checkDumpAudioLog.Text = "Dump audio log";
             this.toolTip.SetToolTip(this.checkDumpAudioLog, resources.GetString("checkDumpAudioLog.ToolTip"));
             // 
             // themedLabel2
@@ -557,6 +559,7 @@
             // 
             // checkStartup
             // 
+            this.checkStartup.Caption = "Run when Windows starts";
             // 
             // 
             // 
@@ -571,10 +574,10 @@
             this.checkStartup.Name = "checkStartup";
             this.checkStartup.Size = new System.Drawing.Size(442, 30);
             this.checkStartup.TabIndex = 39;
-            this.checkStartup.Text = "Run when Windows starts";
             // 
             // checkStartMinimized
             // 
+            this.checkStartMinimized.Caption = "Start minimized to tray";
             // 
             // 
             // 
@@ -589,13 +592,13 @@
             this.checkStartMinimized.Name = "checkStartMinimized";
             this.checkStartMinimized.Size = new System.Drawing.Size(442, 30);
             this.checkStartMinimized.TabIndex = 41;
-            this.checkStartMinimized.Text = "Start minimized to tray";
             this.toolTip.SetToolTip(this.checkStartMinimized, "With this option enabled, the RSTK window will not be shown when the application\r" +
         "\nis launched, and will instead be immediately minimized to the system task tray." +
         "");
             // 
             // checkLaunchAnywhere
             // 
+            this.checkLaunchAnywhere.Caption = "CTRL+ SHIFT+ R launches Rocksmith";
             // 
             // 
             // 
@@ -610,12 +613,12 @@
             this.checkLaunchAnywhere.Name = "checkLaunchAnywhere";
             this.checkLaunchAnywhere.Size = new System.Drawing.Size(442, 30);
             this.checkLaunchAnywhere.TabIndex = 44;
-            this.checkLaunchAnywhere.Text = "CTRL+ SHIFT+ R launches Rocksmith";
             this.toolTip.SetToolTip(this.checkLaunchAnywhere, "With this option enabled, RSTK will register a global system hotkey bound to CTRL" +
         " + SHIFT + R\r\nfor quickly launching Rocksmith (via Steam) from anywhere.");
             // 
             // checkAutoHide
             // 
+            this.checkAutoHide.Caption = "Hide while Rocksmith is running";
             // 
             // 
             // 
@@ -632,13 +635,13 @@
             this.checkAutoHide.Name = "checkAutoHide";
             this.checkAutoHide.Size = new System.Drawing.Size(442, 30);
             this.checkAutoHide.TabIndex = 40;
-            this.checkAutoHide.Text = "Hide while Rocksmith is running";
             this.toolTip.SetToolTip(this.checkAutoHide, "With this option enabled, RSTK will minimize itself Rocksmith is launched, and wi" +
         "ll restore itself\r\nwhen Rocksmith exits (if RSTK was not already hidden when Roc" +
         "ksmith was launched).");
             // 
             // checkExitWhenRocksmithTerminated
             // 
+            this.checkExitWhenRocksmithTerminated.Caption = "Exit when Rocksmith exits";
             // 
             // 
             // 
@@ -653,10 +656,34 @@
             this.checkExitWhenRocksmithTerminated.Name = "checkExitWhenRocksmithTerminated";
             this.checkExitWhenRocksmithTerminated.Size = new System.Drawing.Size(442, 30);
             this.checkExitWhenRocksmithTerminated.TabIndex = 43;
-            this.checkExitWhenRocksmithTerminated.Text = "Exit when Rocksmith exits";
             this.toolTip.SetToolTip(this.checkExitWhenRocksmithTerminated, "Recommended setting: Off\r\n\r\nWith this option enabled, RSTK will terminate itself " +
         "when Rocksmith is terminated\r\n(will not take effect if the Rocksmith session is " +
         "shorter than 30 seconds).");
+            // 
+            // tbLaunchCommand
+            // 
+            this.tbLaunchCommand.Caption = "Pre-launch command lines";
+            this.tbLaunchCommand.Location = new System.Drawing.Point(0, 610);
+            this.tbLaunchCommand.Margin = new System.Windows.Forms.Padding(0);
+            this.tbLaunchCommand.Name = "tbLaunchCommand";
+            this.tbLaunchCommand.Size = new System.Drawing.Size(442, 102);
+            this.tbLaunchCommand.TabIndex = 45;
+            // 
+            // 
+            // 
+            this.tbLaunchCommand.TextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbLaunchCommand.TextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tbLaunchCommand.TextBox.Location = new System.Drawing.Point(0, 0);
+            this.tbLaunchCommand.TextBox.Margin = new System.Windows.Forms.Padding(0);
+            this.tbLaunchCommand.TextBox.Multiline = true;
+            this.tbLaunchCommand.TextBox.Name = "";
+            this.tbLaunchCommand.TextBox.Size = new System.Drawing.Size(442, 72);
+            this.tbLaunchCommand.TextBox.TabIndex = 0;
+            this.tbLaunchCommand.TextBox.WordWrap = false;
+            this.toolTip.SetToolTip(this.tbLaunchCommand, resources.GetString("tbLaunchCommand.ToolTip"));
+            this.tbLaunchCommand.Vertical = true;
             // 
             // panStatus
             // 
@@ -666,24 +693,8 @@
             this.panStatus.Location = new System.Drawing.Point(10, 10);
             this.panStatus.Margin = new System.Windows.Forms.Padding(0, 0, 0, 20);
             this.panStatus.Name = "panStatus";
-            this.panStatus.Size = new System.Drawing.Size(116, 157);
+            this.panStatus.Size = new System.Drawing.Size(92, 157);
             this.panStatus.TabIndex = 29;
-            // 
-            // lblAbout
-            // 
-            this.lblAbout.Accent = ((uint)(0u));
-            this.lblAbout.AccentMode = true;
-            this.lblAbout.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.lblAbout.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.lblAbout.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblAbout.Location = new System.Drawing.Point(10, 845);
-            this.lblAbout.Margin = new System.Windows.Forms.Padding(0);
-            this.lblAbout.Name = "lblAbout";
-            this.lblAbout.Size = new System.Drawing.Size(116, 24);
-            this.lblAbout.TabIndex = 102;
-            this.lblAbout.Text = "About";
-            this.lblAbout.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblAbout.Click += new System.EventHandler(this.lblAbout_Click);
             // 
             // toolTip
             // 
@@ -697,7 +708,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(1117, 879);
+            this.ClientSize = new System.Drawing.Size(1237, 924);
             this.Controls.Add(this.splitter);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -736,7 +747,6 @@
         private System.Windows.Forms.Panel panLaunchButtons;
         private System.Windows.Forms.SplitContainer splitter;
         private System.Windows.Forms.Panel panStatus;
-        private Marzersoft.Themes.ThemedLabel lblAbout;
         private System.Windows.Forms.ToolTip toolTip;
         private ComboBoxRow cbResolution;
         private Marzersoft.Themes.ThemedLabel themedLabel4;
@@ -759,6 +769,7 @@
         private CheckBoxRow checkCycleDisplays;
         private CheckBoxRow checkExitWhenRocksmithTerminated;
         private CheckBoxRow checkLaunchAnywhere;
+        private TextBoxRow tbLaunchCommand;
     }
 }
 

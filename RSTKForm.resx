@@ -226,6 +226,12 @@ Enable this if you need to send debugging information to Ubisoft. It will create
 located in the same directory as the Rocksmith application. Once you have run the game with this switched on
 be sure to switch it off again next time (leaving it enabled can degrade performance).</value>
   </data>
+  <data name="tbLaunchCommand.ToolTip" xml:space="preserve">
+    <value>System commands to run prior to launching Rocksmith (only executed if Rocksmith is launched via RSTK).
+
+Current working directory (CWD) for the command environment is set to Rocksmith's directory.
+Separate commands by new lines.</value>
+  </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>47</value>
   </metadata>
