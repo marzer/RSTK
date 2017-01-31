@@ -29,21 +29,21 @@ namespace RSTK
             DesignerSerializationVisibility(DesignerSerializationVisibility.Visible),
             DefaultValue(""),
             Category("Settings Row")]
-        public override string Text
+        public string Caption
         {
-            get { return text; }
+            get { return caption; }
             set
             {
-                if ((value = (value ?? "").Trim()).Equals(text))
+                if ((value = (value ?? "").Trim()).Equals(caption))
                     return;
-                text = value;
+                caption = value;
                 if (IsDesignMode)
                     Refresh();
                 else
-                    Invalidate(new Rectangle(30, 0, 150, Height));
+                    Invalidate(new Rectangle(30, 0, 150, vertical ? 30 : Height));
             }
         }
-        private string text = "";
+        private string caption = "";
 
         /// <summary>
         /// Icon shown on the control's left edge.
@@ -58,7 +58,7 @@ namespace RSTK
                 if (image != value)
                 {
                     image = value;
-                    Invalidate(new Rectangle(0, 0, 30, Height));
+                    Invalidate(new Rectangle(0, 0, 30, vertical ? 30 : Height));
                 }
             }
         }
@@ -67,6 +67,33 @@ namespace RSTK
         protected const int ImageWidth = 30;
         protected const int TextWidth = 230;
         protected const float DisabledAlpha = 0.3f;
+
+        /// <summary>
+        /// Is this vertically-oriented
+        /// (content appears below the caption)?
+        /// </summary>
+        [Browsable(true),
+            DesignerSerializationVisibility(DesignerSerializationVisibility.Visible),
+            Category("Settings Row"),
+            DefaultValue(false)]
+        public bool Vertical
+        {
+            get { return vertical; }
+            set
+            {
+                if (vertical == value)
+                    return;
+
+                vertical = value;
+                panContents.SuspendLayout();
+                panContents.Bounds = vertical ?
+                    Rectangle.FromLTRB(0, 30, Width, Height)
+                    : Rectangle.FromLTRB(ImageWidth + TextWidth + 5, 0, Width, Height);
+                panContents.ResumeLayout(true);
+                Refresh();
+            }
+        }
+        private bool vertical = false;
 
         /////////////////////////////////////////////////////////////////////
         // CONSTRUCTOR
@@ -109,7 +136,7 @@ namespace RSTK
         {
             base.OnPaint(e);
 
-            if (!((image != null && !IsDesignMode) || text.Length > 0))
+            if (!((image != null && !IsDesignMode) || caption.Length > 0))
                 return;
 
             e.Graphics.AsQuality(GraphicsQuality.High, (g) =>
@@ -124,23 +151,24 @@ namespace RSTK
                         ia.SetColorMatrix(cm);
 
                         g.DrawImage(image,
-                            new Rectangle((ImageWidth / 2) - image.Width / 2, Height / 2 - image.Height / 2,
-                            image.Width, image.Height),
+                            new Rectangle((ImageWidth / 2) - image.Width / 2,
+                                vertical ? 0 : Height / 2 - image.Height / 2,
+                                image.Width, image.Height),
                             0, 0, image.Width, image.Height,
                             GraphicsUnit.Pixel, ia);
                     }
                 }
 
-                if (text.Length > 0)
+                if (caption.Length > 0)
                 {
                     using (var sf = new StringFormat())
                     {
                         sf.Alignment = StringAlignment.Far;
                         sf.LineAlignment = StringAlignment.Center;
                         sf.Trimming = StringTrimming.EllipsisWord;
-                        g.DrawString(text, Font,
+                        g.DrawString(caption, Font,
                             Color.FromArgb(Enabled ? 255 : DisabledAlpha.Project(0,255), ForeColor),
-                            new Rectangle(ImageWidth, 0, TextWidth, Height), sf);
+                            new Rectangle(ImageWidth, 0, TextWidth, vertical ? 30 : Height), sf);
                     }
                 }
             });
@@ -310,6 +338,19 @@ namespace RSTK
             set { CheckBox.Checked = value; }
         }
 
+        /// <summary>
+        /// Alias for CheckBox.Text.
+        /// </summary>
+        [Browsable(true),
+            DesignerSerializationVisibility(DesignerSerializationVisibility.Visible),
+            DefaultValue(""),
+            Category("Settings Row")]
+        public override string Text
+        {
+            get { return CheckBox.Text; }
+            set { CheckBox.Text = value; }
+        }
+
         protected override void Initialize(Panel contents)
         {
             contents.Controls.Add(CheckBox = new CheckBox());
@@ -335,21 +376,21 @@ namespace RSTK
             DesignerSerializationVisibility(DesignerSerializationVisibility.Visible),
             DefaultValue(""),
             Category("Settings Row")]
-        public string Value
+        public override string Text
         {
-            get { return valueText; }
+            get { return text; }
             set
             {
-                if ((value = (value ?? "").Trim()).Equals(valueText))
+                if ((value = (value ?? "").Trim()).Equals(text))
                     return;
-                valueText = value;
+                text = value;
                 if (IsDesignMode)
                     Refresh();
                 else
                     contents.Invalidate();
             }
         }
-        private string valueText = "";
+        private string text = "";
 
         protected override void Initialize(Panel contents)
         {
@@ -357,7 +398,7 @@ namespace RSTK
 
             contents.Paint += (s, e) =>
             {
-                if (valueText.Length == 0)
+                if (text.Length == 0)
                     return;
 
                 e.Graphics.AsQuality(GraphicsQuality.High, (g) =>
@@ -367,12 +408,73 @@ namespace RSTK
                         sf.Alignment = StringAlignment.Near;
                         sf.LineAlignment = StringAlignment.Center;
                         sf.Trimming = StringTrimming.None;
-                        g.DrawString(valueText, Font,
+                        g.DrawString(text, Font,
                             Color.FromArgb(contents.Parent.Enabled ? 255 : DisabledAlpha.Project(0, 255), ForeColor),
                             contents.ClientRectangle, sf);
                     }
                 });
             };
+        }
+    }
+
+    /// <summary>
+    /// Text box row for the settings section of the RSTK window.
+    /// </summary>
+    public class TextBoxRow : SettingsRow
+    {
+        [Browsable(true),
+            DesignerSerializationVisibility(DesignerSerializationVisibility.Content),
+            Category("Settings Row")]
+        public TextBox TextBox { get; private set; }
+
+        /// <summary>
+        /// Alias for TextBox.Text.
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public override string Text
+        {
+            get { return TextBox.Text; }
+            set { TextBox.Text = value; }
+        }
+
+        /// <summary>
+        /// Alias for TextBox.Multiline.
+        /// </summary>
+        [Browsable(true),
+            DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
+            Category("Settings Row")]
+        public bool Multiline
+        {
+            get { return TextBox.Multiline; }
+            set
+            {
+                if (value == TextBox.Multiline)
+                    return;
+                TextBox.Multiline = value;
+                TextBox.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right
+                    | (value ? AnchorStyles.Bottom : AnchorStyles.None);
+                PositionControl(null, null);
+            }
+        }
+
+        protected override void Initialize(Panel contents)
+        {
+            contents.Controls.Add(TextBox = new ThemedTextBox());
+            Multiline = false;
+            contents.SizeChanged += PositionControl;
+        }
+
+        private void PositionControl(object sender, EventArgs args)
+        {
+            var rect = TextBox.Parent.ClientRectangle;
+            TextBox.Width = rect.Width;
+            if (Multiline)
+            {
+                TextBox.Height = rect.Height;
+                TextBox.Location = Point.Empty;
+            }
+            else
+                TextBox.CenterInParent();
         }
     }
 }
