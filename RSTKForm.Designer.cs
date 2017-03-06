@@ -86,7 +86,7 @@
             this.pbStatus.Location = new System.Drawing.Point(0, 0);
             this.pbStatus.Margin = new System.Windows.Forms.Padding(0);
             this.pbStatus.Name = "pbStatus";
-            this.pbStatus.Size = new System.Drawing.Size(92, 100);
+            this.pbStatus.Size = new System.Drawing.Size(89, 100);
             this.pbStatus.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbStatus.TabIndex = 2;
             this.pbStatus.TabStop = false;
@@ -98,7 +98,7 @@
             this.lblStatus.Location = new System.Drawing.Point(0, 100);
             this.lblStatus.Margin = new System.Windows.Forms.Padding(0);
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(92, 57);
+            this.lblStatus.Size = new System.Drawing.Size(89, 57);
             this.lblStatus.TabIndex = 1;
             this.lblStatus.Text = "Waiting for game path.";
             this.lblStatus.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -124,7 +124,7 @@
             this.btnRocksmithPath.FlatAppearance.BorderSize = 0;
             this.btnRocksmithPath.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRocksmithPath.Image = global::RSTK.Properties.Resources.open_16;
-            this.btnRocksmithPath.Location = new System.Drawing.Point(1078, 35);
+            this.btnRocksmithPath.Location = new System.Drawing.Point(1097, 35);
             this.btnRocksmithPath.Margin = new System.Windows.Forms.Padding(0);
             this.btnRocksmithPath.Name = "btnRocksmithPath";
             this.btnRocksmithPath.Size = new System.Drawing.Size(26, 26);
@@ -141,7 +141,7 @@
             this.themedLabel3.Location = new System.Drawing.Point(0, 0);
             this.themedLabel3.Margin = new System.Windows.Forms.Padding(0);
             this.themedLabel3.Name = "themedLabel3";
-            this.themedLabel3.Size = new System.Drawing.Size(1104, 30);
+            this.themedLabel3.Size = new System.Drawing.Size(1123, 30);
             this.themedLabel3.TabIndex = 25;
             this.themedLabel3.Text = "Rocksmith Location";
             // 
@@ -154,7 +154,7 @@
             this.tbRocksmithPath.Margin = new System.Windows.Forms.Padding(0);
             this.tbRocksmithPath.Name = "tbRocksmithPath";
             this.tbRocksmithPath.ReadOnly = true;
-            this.tbRocksmithPath.Size = new System.Drawing.Size(1070, 20);
+            this.tbRocksmithPath.Size = new System.Drawing.Size(1089, 20);
             this.tbRocksmithPath.TabIndex = 1;
             // 
             // dlgBrowse
@@ -175,7 +175,7 @@
             this.btnLaunch.Margin = new System.Windows.Forms.Padding(0);
             this.btnLaunch.Name = "btnLaunch";
             this.btnLaunch.Padding = new System.Windows.Forms.Padding(0, 5, 0, 5);
-            this.btnLaunch.Size = new System.Drawing.Size(92, 70);
+            this.btnLaunch.Size = new System.Drawing.Size(89, 70);
             this.btnLaunch.TabIndex = 100;
             this.btnLaunch.Text = "Launch";
             this.btnLaunch.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -199,7 +199,7 @@
             this.btnLaunchSteam.Margin = new System.Windows.Forms.Padding(0);
             this.btnLaunchSteam.Name = "btnLaunchSteam";
             this.btnLaunchSteam.Padding = new System.Windows.Forms.Padding(0, 5, 0, 5);
-            this.btnLaunchSteam.Size = new System.Drawing.Size(92, 70);
+            this.btnLaunchSteam.Size = new System.Drawing.Size(89, 70);
             this.btnLaunchSteam.TabIndex = 101;
             this.btnLaunchSteam.Text = "Launch via Steam";
             this.btnLaunchSteam.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -217,7 +217,7 @@
             this.panLaunchButtons.Margin = new System.Windows.Forms.Padding(0);
             this.panLaunchButtons.Name = "panLaunchButtons";
             this.panLaunchButtons.Padding = new System.Windows.Forms.Padding(0, 20, 0, 0);
-            this.panLaunchButtons.Size = new System.Drawing.Size(92, 747);
+            this.panLaunchButtons.Size = new System.Drawing.Size(89, 753);
             this.panLaunchButtons.TabIndex = 28;
             this.panLaunchButtons.Visible = false;
             // 
@@ -240,8 +240,8 @@
             this.splitter.Panel2.Controls.Add(this.panLaunchButtons);
             this.splitter.Panel2.Controls.Add(this.panStatus);
             this.splitter.Panel2.Padding = new System.Windows.Forms.Padding(10);
-            this.splitter.Size = new System.Drawing.Size(1237, 924);
-            this.splitter.SplitterDistance = 1124;
+            this.splitter.Size = new System.Drawing.Size(1253, 930);
+            this.splitter.SplitterDistance = 1143;
             this.splitter.SplitterWidth = 1;
             this.splitter.TabIndex = 29;
             this.splitter.TabStop = false;
@@ -255,7 +255,7 @@
             this.panRocksmithPath.Controls.Add(this.btnRocksmithPath);
             this.panRocksmithPath.Location = new System.Drawing.Point(10, 10);
             this.panRocksmithPath.Name = "panRocksmithPath";
-            this.panRocksmithPath.Size = new System.Drawing.Size(1104, 79);
+            this.panRocksmithPath.Size = new System.Drawing.Size(1123, 79);
             this.panRocksmithPath.TabIndex = 31;
             // 
             // flowLayoutPanel
@@ -288,7 +288,7 @@
             this.flowLayoutPanel.Location = new System.Drawing.Point(10, 124);
             this.flowLayoutPanel.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel.Name = "flowLayoutPanel";
-            this.flowLayoutPanel.Size = new System.Drawing.Size(1104, 790);
+            this.flowLayoutPanel.Size = new System.Drawing.Size(1123, 796);
             this.flowLayoutPanel.TabIndex = 30;
             this.flowLayoutPanel.Visible = false;
             this.flowLayoutPanel.WrapContents = false;
@@ -319,7 +319,7 @@
             this.cbResolution.ComboBox.Location = new System.Drawing.Point(0, 5);
             this.cbResolution.ComboBox.Margin = new System.Windows.Forms.Padding(0);
             this.cbResolution.ComboBox.Name = "";
-            this.cbResolution.ComboBox.Size = new System.Drawing.Size(177, 21);
+            this.cbResolution.ComboBox.Size = new System.Drawing.Size(212, 21);
             this.cbResolution.ComboBox.TabIndex = 0;
             this.cbResolution.Location = new System.Drawing.Point(0, 30);
             this.cbResolution.Margin = new System.Windows.Forms.Padding(0);
@@ -340,7 +340,7 @@
             this.cbFullscreenMode.ComboBox.Location = new System.Drawing.Point(0, 5);
             this.cbFullscreenMode.ComboBox.Margin = new System.Windows.Forms.Padding(0);
             this.cbFullscreenMode.ComboBox.Name = "";
-            this.cbFullscreenMode.ComboBox.Size = new System.Drawing.Size(177, 21);
+            this.cbFullscreenMode.ComboBox.Size = new System.Drawing.Size(212, 21);
             this.cbFullscreenMode.ComboBox.TabIndex = 0;
             this.cbFullscreenMode.Location = new System.Drawing.Point(0, 60);
             this.cbFullscreenMode.Margin = new System.Windows.Forms.Padding(0);
@@ -359,7 +359,7 @@
             this.checkEmulateFullscreen.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkEmulateFullscreen.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkEmulateFullscreen.CheckBox.Name = "";
-            this.checkEmulateFullscreen.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkEmulateFullscreen.CheckBox.Size = new System.Drawing.Size(212, 30);
             this.checkEmulateFullscreen.CheckBox.TabIndex = 0;
             this.checkEmulateFullscreen.CheckBox.Text = "(only applies in Windowed mode)";
             this.checkEmulateFullscreen.Location = new System.Drawing.Point(0, 90);
@@ -380,7 +380,7 @@
             this.checkCycleDisplays.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkCycleDisplays.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkCycleDisplays.CheckBox.Name = "";
-            this.checkCycleDisplays.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkCycleDisplays.CheckBox.Size = new System.Drawing.Size(212, 30);
             this.checkCycleDisplays.CheckBox.TabIndex = 0;
             this.checkCycleDisplays.CheckBox.Text = "(only applies in ExclusiveFullscreen mode)";
             this.checkCycleDisplays.Location = new System.Drawing.Point(0, 120);
@@ -415,7 +415,7 @@
             this.checkExclusiveMode.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkExclusiveMode.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkExclusiveMode.CheckBox.Name = "";
-            this.checkExclusiveMode.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkExclusiveMode.CheckBox.Size = new System.Drawing.Size(212, 30);
             this.checkExclusiveMode.CheckBox.TabIndex = 0;
             this.checkExclusiveMode.Location = new System.Drawing.Point(0, 200);
             this.checkExclusiveMode.Margin = new System.Windows.Forms.Padding(0);
@@ -436,7 +436,7 @@
             this.checkUltraLowLatencyMode.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkUltraLowLatencyMode.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkUltraLowLatencyMode.CheckBox.Name = "";
-            this.checkUltraLowLatencyMode.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkUltraLowLatencyMode.CheckBox.Size = new System.Drawing.Size(212, 30);
             this.checkUltraLowLatencyMode.CheckBox.TabIndex = 0;
             this.checkUltraLowLatencyMode.Location = new System.Drawing.Point(0, 230);
             this.checkUltraLowLatencyMode.Margin = new System.Windows.Forms.Padding(0);
@@ -516,7 +516,7 @@
             this.checkMicrophone.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkMicrophone.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkMicrophone.CheckBox.Name = "";
-            this.checkMicrophone.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkMicrophone.CheckBox.Size = new System.Drawing.Size(212, 30);
             this.checkMicrophone.CheckBox.TabIndex = 0;
             this.checkMicrophone.Location = new System.Drawing.Point(0, 350);
             this.checkMicrophone.Margin = new System.Windows.Forms.Padding(0);
@@ -536,7 +536,7 @@
             this.checkDumpAudioLog.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkDumpAudioLog.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkDumpAudioLog.CheckBox.Name = "";
-            this.checkDumpAudioLog.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkDumpAudioLog.CheckBox.Size = new System.Drawing.Size(212, 30);
             this.checkDumpAudioLog.CheckBox.TabIndex = 0;
             this.checkDumpAudioLog.Location = new System.Drawing.Point(0, 380);
             this.checkDumpAudioLog.Margin = new System.Windows.Forms.Padding(0);
@@ -567,7 +567,7 @@
             this.checkStartup.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkStartup.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkStartup.CheckBox.Name = "";
-            this.checkStartup.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkStartup.CheckBox.Size = new System.Drawing.Size(212, 30);
             this.checkStartup.CheckBox.TabIndex = 0;
             this.checkStartup.Location = new System.Drawing.Point(0, 460);
             this.checkStartup.Margin = new System.Windows.Forms.Padding(0);
@@ -585,7 +585,7 @@
             this.checkStartMinimized.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkStartMinimized.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkStartMinimized.CheckBox.Name = "";
-            this.checkStartMinimized.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkStartMinimized.CheckBox.Size = new System.Drawing.Size(212, 30);
             this.checkStartMinimized.CheckBox.TabIndex = 0;
             this.checkStartMinimized.Location = new System.Drawing.Point(0, 490);
             this.checkStartMinimized.Margin = new System.Windows.Forms.Padding(0);
@@ -606,7 +606,7 @@
             this.checkLaunchAnywhere.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkLaunchAnywhere.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkLaunchAnywhere.CheckBox.Name = "";
-            this.checkLaunchAnywhere.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkLaunchAnywhere.CheckBox.Size = new System.Drawing.Size(212, 30);
             this.checkLaunchAnywhere.CheckBox.TabIndex = 0;
             this.checkLaunchAnywhere.Location = new System.Drawing.Point(0, 520);
             this.checkLaunchAnywhere.Margin = new System.Windows.Forms.Padding(0);
@@ -628,7 +628,7 @@
             this.checkAutoHide.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkAutoHide.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkAutoHide.CheckBox.Name = "";
-            this.checkAutoHide.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkAutoHide.CheckBox.Size = new System.Drawing.Size(212, 30);
             this.checkAutoHide.CheckBox.TabIndex = 0;
             this.checkAutoHide.Location = new System.Drawing.Point(0, 550);
             this.checkAutoHide.Margin = new System.Windows.Forms.Padding(0);
@@ -649,7 +649,7 @@
             this.checkExitWhenRocksmithTerminated.CheckBox.Location = new System.Drawing.Point(0, 0);
             this.checkExitWhenRocksmithTerminated.CheckBox.Margin = new System.Windows.Forms.Padding(0);
             this.checkExitWhenRocksmithTerminated.CheckBox.Name = "";
-            this.checkExitWhenRocksmithTerminated.CheckBox.Size = new System.Drawing.Size(177, 30);
+            this.checkExitWhenRocksmithTerminated.CheckBox.Size = new System.Drawing.Size(212, 30);
             this.checkExitWhenRocksmithTerminated.CheckBox.TabIndex = 0;
             this.checkExitWhenRocksmithTerminated.Location = new System.Drawing.Point(0, 580);
             this.checkExitWhenRocksmithTerminated.Margin = new System.Windows.Forms.Padding(0);
@@ -662,7 +662,7 @@
             // 
             // tbLaunchCommand
             // 
-            this.tbLaunchCommand.Caption = "Pre-launch command lines";
+            this.tbLaunchCommand.Caption = "Pre-launch batch script";
             this.tbLaunchCommand.Location = new System.Drawing.Point(0, 610);
             this.tbLaunchCommand.Margin = new System.Windows.Forms.Padding(0);
             this.tbLaunchCommand.Name = "tbLaunchCommand";
@@ -693,7 +693,7 @@
             this.panStatus.Location = new System.Drawing.Point(10, 10);
             this.panStatus.Margin = new System.Windows.Forms.Padding(0, 0, 0, 20);
             this.panStatus.Name = "panStatus";
-            this.panStatus.Size = new System.Drawing.Size(92, 157);
+            this.panStatus.Size = new System.Drawing.Size(89, 157);
             this.panStatus.TabIndex = 29;
             // 
             // toolTip
@@ -708,7 +708,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(1237, 924);
+            this.ClientSize = new System.Drawing.Size(1253, 930);
             this.Controls.Add(this.splitter);
             this.MaximizeBox = false;
             this.MinimizeBox = false;

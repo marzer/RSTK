@@ -539,32 +539,62 @@ namespace RSTK
         {
             if (rocksmith == null || running || lastLaunchTimer.Seconds < 5.0)
                 return;
-
-            //pre-launch commands
-            var commands = tbLaunchCommand.Text
+            
+            //parse pre-launch commands, convert to batch script
+            var batchLinesArray = tbLaunchCommand.Text
                 .NormalizeLineEndings("\n")
                 .Trim()
                 .Split(new char[]{'\n'}, StringSplitOptions.RemoveEmptyEntries);
-            if (commands.Length > 0)
+            if (batchLinesArray.Length > 0)
             {
-                for (int i = 0; i < commands.Length; ++i)
+                List<string> batchLines = new List<string>();
+                for (int i = 0; i < batchLinesArray.Length; ++i)
                 {
-                    var cmd = commands[i].Trim();
+                    var cmd = batchLinesArray[i].Trim();
                     if (cmd.Length == 0)
                         continue;
+                    batchLines.Add(cmd);
+                }
 
+                if (batchLines.Count > 0)
+                {
+                    //write as batch file
+                    var batchPath = Path.Combine(App.ExecutableDirectory, "prelaunch.bat");
+                    using (var stream = new FileStream(batchPath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    using (var writer = new StreamWriter(stream))
+                    {
+                        writer.WriteLine("@ECHO OFF");
+                        writer.WriteLine("@setlocal enableextensions enabledelayedexpansion");
+                        writer.WriteLine("CD /D \"{0}\"", rocksmith.GameDirectory);
+                        writer.WriteLine("REM //////////////// BEGIN USER SCRIPT ////////////////");
+                        foreach (var line in batchLines)
+                            writer.WriteLine(
+                                Regex.Replace(line, "[%]ROCKSMITH_DIR[%]", rocksmith.GameDirectory,
+                                    RegexOptions.Compiled | RegexOptions.IgnoreCase));
+                        writer.WriteLine("REM ////////////////// END USER SCRIPT ////////////////");
+                        writer.WriteLine("@endlocal");
+                        writer.WriteLine("EXIT /B 0");
+                    }
+
+                    //launch batch file process
                     using (var process = new Process())
                     {
                         ProcessStartInfo si = new ProcessStartInfo();
                         //si.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
                         //si.CreateNoWindow = true;
-                        si.FileName = "cmd.exe";
-                        si.Arguments = string.Format("/c {0}", cmd);
+                        si.FileName = batchPath;
                         si.UseShellExecute = false;
                         si.WorkingDirectory = rocksmith.GameDirectory;
                         process.StartInfo = si;
                         process.Start();
                         process.WaitForExit();
+
+                        if (process.ExitCode != 0)
+                        {
+                            Logger.ErrorMessage(this, "Pre-launch commands exited with code {0}; aborting launch.",
+                                process.ExitCode);
+                            return;
+                        }
                     }
                 }
             }

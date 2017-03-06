@@ -123,6 +123,9 @@
   <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>123, 11</value>
   </metadata>
+  <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>123, 11</value>
+  </metadata>
   <data name="cbFullscreenMode.ToolTip" xml:space="preserve">
     <value>Windowed: Runs in a regular window.
 
@@ -227,10 +230,16 @@ located in the same directory as the Rocksmith application. Once you have run th
 be sure to switch it off again next time (leaving it enabled can degrade performance).</value>
   </data>
   <data name="tbLaunchCommand.ToolTip" xml:space="preserve">
-    <value>System commands to run prior to launching Rocksmith (only executed if Rocksmith is launched via RSTK).
+    <value>Any text entered in this box is inserted inside a windows batch file and run immediately prior to launching
+Rocksmith (when it is launched via RSTK). Exiting the batch script with an exit code other than 0 will prevent
+Rocksmith from launching (so you may handle error conditions).
 
-Current working directory (CWD) for the command environment is set to Rocksmith's directory.
-Separate commands by new lines.</value>
+Current working directory (CWD) for the command environment is set to Rocksmith's directory. RSTK will
+substitute any instances of %ROCKSMITH_DIR% for your game's actual directory.
+
+If you'd like to see exactly how the batch script is generated (i.e. what boilerplate code is inserted either side
+of your text), run the game via RSTK at least once with some text in this box, then view the contents of
+RSTK\prelaunch.bat.</value>
   </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>47</value>
