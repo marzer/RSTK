@@ -611,9 +611,7 @@ namespace RSTK
                 GameProcess = processes.FirstOrDefault();
 
             //cleanup
-            foreach (var p in processes)
-            if (p != process)
-                p.Dispose();
+            processes.DisposeAll();
         }
 
         /////////////////////////////////////////////////////////////////////
