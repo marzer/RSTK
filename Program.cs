@@ -21,7 +21,6 @@ namespace RSTK
             App.AutoCheckForUpdates = false;
             App.TrayIcon = true;
             App.SplashForm = false;
-            //App.Theme = App.Themes["dark"];
             App.Run(args);
         }
     }

@@ -9,13 +9,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Marzersoft.Controls;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace RSTK
 {
     public partial class RSTKForm : MainForm
     {
         private Rocksmith rocksmith = null;
-        private volatile bool running = false, readingConfig = false, showOnRocksmithExit = false;
+        private volatile bool running = false, readingConfig = false, showOnRocksmithExit = false, dirtyConfig = false;
         private readonly Marzersoft.Timer lastLaunchTimer
             = new Marzersoft.Timer(-5.0);
         private readonly List<Control> disabledWhileRunning
@@ -23,6 +24,37 @@ namespace RSTK
         private readonly List<ToolStripItem> disabledWhileRunningToolStrip
             = new List<ToolStripItem>();
         private ToolStripItem tsLaunch, tsLaunchSteam, tsOpenFolder;
+
+
+        private static readonly List<String> DefaultGamePaths = new List<string>()
+        {
+            @"C:\Program Files\Steam\steamapps\common\Rocksmith2014\Rocksmith2014.exe",
+            @"C:\Program Files (x86)\Steam\steamapps\common\Rocksmith2014\Rocksmith2014.exe",
+            @"C:\Games\SteamLibrary\steamapps\common\Rocksmith2014\Rocksmith2014.exe",
+            @"D:\Games\SteamLibrary\steamapps\common\Rocksmith2014\Rocksmith2014.exe"
+        };
+
+        private static readonly List<Size> DefaultSupportedResolutions = new List<Size>
+        {
+            new Size( 640,480 ),
+            new Size( 720,480 ),
+            new Size( 720,576 ),
+            new Size( 800,600 ),
+            new Size( 1024,768 ),
+            new Size( 1152,864 ),
+            new Size( 1280,720 ), //default
+            new Size( 1280,768 ),
+            new Size( 1280,800 ),
+            new Size( 1280,960 ),
+            new Size( 1280,1024 ),
+            new Size( 1360,768 ),
+            new Size( 1366,768 ),
+            new Size( 1440,900 ),
+            new Size( 1600,900 ),
+            new Size( 1600,1024 ),
+            new Size( 1680,1050 ),
+            new Size( 1920,1080 )
+        };
 
         public RSTKForm()
         {
@@ -45,13 +77,33 @@ namespace RSTK
                 }
             };
 
-            //resolution
-            foreach (var res in Rocksmith.SupportedResolutions)
+            //resolutions
+            var resolutions = new List<Size>();
+            try
             {
-                cbResolution.ComboBox.Items.Add(string.Format("{0} x {1}", res.Item1, res.Item2));
-                if (res.Item1 == 1280 && res.Item2 == 720)
-                    cbResolution.ComboBox.SelectedIndex = cbResolution.ComboBox.Items.Count - 1;
+                var displays = Devices.EnumerateAttachedDisplayDevices(true);
+                var modes = Devices.EnumerateSupportedDisplayModes(displays[0]);
+                foreach (var mode in modes)
+                {
+                    if (mode.dmPelsWidth < 640 || mode.dmPelsHeight < 480)
+                        continue;
+                    resolutions.Add(new Size(mode.dmPelsWidth, mode.dmPelsHeight));
+                }
             }
+            catch (Exception e)
+            {
+                Logger.Ex(e);
+                resolutions.AddRange(DefaultSupportedResolutions);
+            }
+            resolutions = resolutions.Distinct().ToList();
+            resolutions.Sort((a, b) =>
+            {
+                return (a.Width * 10000 + a.Height)
+                    .CompareTo(b.Width * 10000 + b.Height);
+            });
+            foreach (var res in resolutions)
+                cbResolution.ComboBox.Items.Add(string.Format("{0} x {1}", res.Width, res.Height));
+            cbResolution.SelectedIndex = cbResolution.ComboBox.Items.IndexOf("1280 x 720");
             cbResolution.ComboBox.SelectedIndexChanged += (s, e) => { SaveConfigChanges(); };
             disabledWhileRunning.Add(cbResolution);
 
@@ -72,7 +124,7 @@ namespace RSTK
                 checkEmulateFullscreen.Image = checkEmulateFullscreen.Checked
                     ? App.Images.Resource(!App.IsAdministrator ? "uac_24" : "warning_24", App.Assembly) : null;
                 App.Config.User.Set("emulated_fullscreen", checkEmulateFullscreen.Checked);
-                App.Config.User.Flush();
+                dirtyConfig = true;
             };
 
             //exclusive mode
@@ -128,7 +180,7 @@ namespace RSTK
             checkAutoHide.CheckBox.CheckedChanged += (s, e) =>
             {
                 App.Config.User.Set("auto_hide", checkAutoHide.Checked);
-                App.Config.User.Flush();
+                dirtyConfig = true;
             };
 
             //start minimized
@@ -136,7 +188,7 @@ namespace RSTK
             checkStartMinimized.CheckBox.CheckedChanged += (s, e) =>
             {
                 App.Config.User.Set("start_hidden", checkStartMinimized.Checked);
-                App.Config.User.Flush();
+                dirtyConfig = true;
             };
 
             //cycle displays on exit
@@ -148,7 +200,7 @@ namespace RSTK
                 checkCycleDisplays.Image = checkCycleDisplays.Checked
                     ? App.Images.Resource(!App.IsAdministrator ? "uac_24" : "warning_24", App.Assembly) : null;
                 App.Config.User.Set("cycle_displays", checkCycleDisplays.Checked);
-                App.Config.User.Flush();
+                dirtyConfig = true;
             };
 
             //cycle displays on exit
@@ -160,7 +212,7 @@ namespace RSTK
                 checkExitWhenRocksmithTerminated.Image
                 = checkExitWhenRocksmithTerminated.Checked ? App.Images.Resource("warning_24", App.Assembly) : null;
                 App.Config.User.Set("exit_on_terminate", checkExitWhenRocksmithTerminated.Checked);
-                App.Config.User.Flush();
+                dirtyConfig = true;
             };
 
             //launch from anywhere hotkey
@@ -168,7 +220,7 @@ namespace RSTK
             checkLaunchAnywhere.CheckBox.CheckedChanged += (s, e) =>
             {
                 App.Config.User.Set("launch_anywhere_hotkey", checkLaunchAnywhere.Checked);
-                App.Config.User.Flush();
+                dirtyConfig = true;
             };
 
             //pre-launch command
@@ -180,7 +232,7 @@ namespace RSTK
                 tbLaunchCommand.Image
                     = tbLaunchCommand.Text.Trim().Length > 0 ? App.Images.Resource("warning_24", App.Assembly) : null;
                 App.Config.User.Set("launch_commands", tbLaunchCommand.Text.Trim());
-                App.Config.User.Flush();
+                dirtyConfig = true;
             };
 
             //launch buttons
@@ -250,15 +302,16 @@ namespace RSTK
             };
             disabledWhileRunningToolStrip.Add(icon);
             
+
             //launch game menu icon
-            tsLaunch = icon = AddTrayIconMenuItem("Launch game");
+            tsLaunch = icon = AddTrayIconMenuItem("Play (direct)");
             icon.Visible = false;
             icon.Image = App.Images.Resource("gamepad_24", "invert", App.Assembly);
             icon.Click += btnLaunch_Click;
             disabledWhileRunningToolStrip.Add(icon);
 
             //launch game via steam menu icon
-            tsLaunchSteam = icon = AddTrayIconMenuItem("Launch game via Steam");
+            tsLaunchSteam = icon = AddTrayIconMenuItem("Play (via Steam)");
             icon.Visible = false;
             icon.Image = App.Images.Resource("steam_24", "invert", App.Assembly);
             icon.Click += btnLaunchSteam_Click;
@@ -266,15 +319,29 @@ namespace RSTK
 
             //check command line params
             string path = "";
+            bool pathOK = false;
             if (App.Arguments.Value("path", ref path)
-                && File.Exists(path = path.Trim())
-                && SetRocksmithPath(Path.GetFullPath(path), false))
-                return;
+                && File.Exists(path = path.Trim()))
+                pathOK = SetRocksmithPath(Path.GetFullPath(path), false);
 
             //check user's config
-            if ((path = App.Config.User.Get("path", "").Trim()).Length > 0
+            if (!pathOK
+                &&(path = App.Config.User.Get("path", "").Trim()).Length > 0
                 && File.Exists(path = path.Trim()))
-                SetRocksmithPath(Path.GetFullPath(path), false);
+                pathOK = SetRocksmithPath(Path.GetFullPath(path), false);
+
+            //check rocksmith location presets
+            if (!pathOK)
+            {
+                foreach (var p in DefaultGamePaths)
+                {
+                    if (!File.Exists(p))
+                        continue;
+                    if (pathOK = SetRocksmithPath(Path.GetFullPath(p)))
+                        break;
+                }
+
+            }
 
             //global hotkey
             RegisterHotkey(Keys.Control | Keys.Shift | Keys.R);
@@ -503,7 +570,7 @@ namespace RSTK
             if (writeToConfig)
             {
                 App.Config.User.Set("path", fullPath);
-                App.Config.User.Flush();
+                WriteConfig();
             }
             return true;
         }
@@ -516,15 +583,16 @@ namespace RSTK
 
                 checkExclusiveMode.Checked = rs.ExclusiveMode;
                 checkUltraLowLatencyMode.Checked = rs.Win32UltraLowLatencyMode;
-                for (int i = 0; i < Rocksmith.SupportedResolutions.Count; ++i)
+
+                var resString = string.Format("{0} x {1}", rs.Resolution.Width, rs.Resolution.Height);
+                var resIndex = cbResolution.ComboBox.Items.IndexOf(resString);
+                if (resIndex < 0)
                 {
-                    if (Rocksmith.SupportedResolutions[i].Item1 == rs.Resolution.Width
-                        && Rocksmith.SupportedResolutions[i].Item2 == rs.Resolution.Height)
-                    {
-                        cbResolution.ComboBox.SelectedIndex = i;
-                        break;
-                    }
+                    cbResolution.ComboBox.Items.Add(resString);
+                    resIndex = cbResolution.ComboBox.Items.Count - 1;
                 }
+                cbResolution.SelectedIndex = resIndex;
+                
                 cbFullscreenMode.ComboBox.SelectedIndex = (int)rs.FullscreenMode;
                 trackLatencyBuffer.TrackBar.Value = (int)rs.LatencyBuffer;
                 trackMaxOutputBufferSize.TrackBar.Value = (int)rs.MaxOutputBufferSize;
@@ -616,11 +684,13 @@ namespace RSTK
 
         private void btnLaunchSteam_Click(object sender, EventArgs e)
         {
+            this.Execute(() => { WriteConfig(); });
             LaunchRocksmith();
         }
 
         private void btnLaunch_Click(object sender, EventArgs e)
         {
+            this.Execute(() => { WriteConfig(); });
             LaunchRocksmith(false);
         }
 
@@ -648,9 +718,10 @@ namespace RSTK
 
             rocksmith.ExclusiveMode = checkExclusiveMode.Checked;
             rocksmith.Win32UltraLowLatencyMode = checkUltraLowLatencyMode.Checked;
-            rocksmith.Resolution = new Size(
-                (int)Rocksmith.SupportedResolutions[cbResolution.ComboBox.SelectedIndex].Item1,
-                (int)Rocksmith.SupportedResolutions[cbResolution.ComboBox.SelectedIndex].Item2);
+
+            var resString = (cbResolution.ComboBox.SelectedItem as string).SplitWhitespace();
+            rocksmith.Resolution = new Size(int.Parse(resString[0]), int.Parse(resString[2]));
+
             rocksmith.FullscreenMode = (Rocksmith.FullscreenModes)cbFullscreenMode.ComboBox.SelectedIndex;
             rocksmith.LatencyBuffer = (uint)trackLatencyBuffer.TrackBar.Value;
             rocksmith.MaxOutputBufferSize = (uint)trackMaxOutputBufferSize.TrackBar.Value;
@@ -658,6 +729,12 @@ namespace RSTK
             rocksmith.DumpAudioLog = checkDumpAudioLog.Checked;
 
             rocksmith.WriteConfig();
+        }
+
+        private void flushTimer_Tick(object sender, EventArgs e)
+        {
+            if (dirtyConfig)
+                this.Execute(() => { WriteConfig(); });
         }
 
         protected override void OnShown(EventArgs e)
@@ -681,6 +758,12 @@ namespace RSTK
                 return;
             }
             base.OnHotkeyPress(args);
+        }
+
+        private void WriteConfig()
+        {
+            File.WriteAllText(App.UserConfigPath, App.Config.User.ToString());
+            dirtyConfig = false;
         }
     }
 }

@@ -66,6 +66,7 @@
             this.tbLaunchCommand = new Marzersoft.Controls.TextBoxRow();
             this.panStatus = new System.Windows.Forms.Panel();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.flushTimer = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pbStatus)).BeginInit();
             this.panLaunchButtons.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitter)).BeginInit();
@@ -86,7 +87,7 @@
             this.pbStatus.Location = new System.Drawing.Point(0, 0);
             this.pbStatus.Margin = new System.Windows.Forms.Padding(0);
             this.pbStatus.Name = "pbStatus";
-            this.pbStatus.Size = new System.Drawing.Size(89, 100);
+            this.pbStatus.Size = new System.Drawing.Size(69, 100);
             this.pbStatus.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbStatus.TabIndex = 2;
             this.pbStatus.TabStop = false;
@@ -98,7 +99,7 @@
             this.lblStatus.Location = new System.Drawing.Point(0, 100);
             this.lblStatus.Margin = new System.Windows.Forms.Padding(0);
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(89, 57);
+            this.lblStatus.Size = new System.Drawing.Size(69, 57);
             this.lblStatus.TabIndex = 1;
             this.lblStatus.Text = "Waiting for game path.";
             this.lblStatus.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -124,7 +125,7 @@
             this.btnRocksmithPath.FlatAppearance.BorderSize = 0;
             this.btnRocksmithPath.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRocksmithPath.Image = global::RSTK.Properties.Resources.open_16;
-            this.btnRocksmithPath.Location = new System.Drawing.Point(1097, 35);
+            this.btnRocksmithPath.Location = new System.Drawing.Point(706, 35);
             this.btnRocksmithPath.Margin = new System.Windows.Forms.Padding(0);
             this.btnRocksmithPath.Name = "btnRocksmithPath";
             this.btnRocksmithPath.Size = new System.Drawing.Size(26, 26);
@@ -141,7 +142,7 @@
             this.themedLabel3.Location = new System.Drawing.Point(0, 0);
             this.themedLabel3.Margin = new System.Windows.Forms.Padding(0);
             this.themedLabel3.Name = "themedLabel3";
-            this.themedLabel3.Size = new System.Drawing.Size(1123, 30);
+            this.themedLabel3.Size = new System.Drawing.Size(732, 30);
             this.themedLabel3.TabIndex = 25;
             this.themedLabel3.Text = "Rocksmith Location";
             // 
@@ -154,7 +155,7 @@
             this.tbRocksmithPath.Margin = new System.Windows.Forms.Padding(0);
             this.tbRocksmithPath.Name = "tbRocksmithPath";
             this.tbRocksmithPath.ReadOnly = true;
-            this.tbRocksmithPath.Size = new System.Drawing.Size(1089, 20);
+            this.tbRocksmithPath.Size = new System.Drawing.Size(698, 20);
             this.tbRocksmithPath.TabIndex = 1;
             // 
             // dlgBrowse
@@ -171,17 +172,17 @@
             this.btnLaunch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLaunch.Image = global::RSTK.Properties.Resources.gamepad_24;
             this.btnLaunch.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.btnLaunch.Location = new System.Drawing.Point(0, 20);
+            this.btnLaunch.Location = new System.Drawing.Point(0, 103);
             this.btnLaunch.Margin = new System.Windows.Forms.Padding(0);
             this.btnLaunch.Name = "btnLaunch";
             this.btnLaunch.Padding = new System.Windows.Forms.Padding(0, 5, 0, 5);
-            this.btnLaunch.Size = new System.Drawing.Size(89, 70);
+            this.btnLaunch.Size = new System.Drawing.Size(69, 70);
             this.btnLaunch.TabIndex = 100;
-            this.btnLaunch.Text = "Launch";
+            this.btnLaunch.Text = "Play (direct)";
             this.btnLaunch.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.toolTip.SetToolTip(this.btnLaunch, "Launches Rocksmith by directly launching the game\'s executable. Unless you have e" +
         "xplicit reason to do this\r\n(you will know if you do), it is recommended that you" +
-        " use Launch via Steam instead.");
+        " use Play (via Steam) instead.");
             this.btnLaunch.UseVisualStyleBackColor = true;
             this.btnLaunch.EnabledChanged += new System.EventHandler(this.btnLaunch_EnabledChanged);
             this.btnLaunch.Click += new System.EventHandler(this.btnLaunch_Click);
@@ -195,13 +196,13 @@
             this.btnLaunchSteam.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLaunchSteam.Image = global::RSTK.Properties.Resources.steam_24;
             this.btnLaunchSteam.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.btnLaunchSteam.Location = new System.Drawing.Point(0, 103);
+            this.btnLaunchSteam.Location = new System.Drawing.Point(0, 20);
             this.btnLaunchSteam.Margin = new System.Windows.Forms.Padding(0);
             this.btnLaunchSteam.Name = "btnLaunchSteam";
             this.btnLaunchSteam.Padding = new System.Windows.Forms.Padding(0, 5, 0, 5);
-            this.btnLaunchSteam.Size = new System.Drawing.Size(89, 70);
+            this.btnLaunchSteam.Size = new System.Drawing.Size(69, 70);
             this.btnLaunchSteam.TabIndex = 101;
-            this.btnLaunchSteam.Text = "Launch via Steam";
+            this.btnLaunchSteam.Text = "Play (via Steam)";
             this.btnLaunchSteam.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.toolTip.SetToolTip(this.btnLaunchSteam, "Launches the game via Steam.");
             this.btnLaunchSteam.UseVisualStyleBackColor = true;
@@ -217,7 +218,7 @@
             this.panLaunchButtons.Margin = new System.Windows.Forms.Padding(0);
             this.panLaunchButtons.Name = "panLaunchButtons";
             this.panLaunchButtons.Padding = new System.Windows.Forms.Padding(0, 20, 0, 0);
-            this.panLaunchButtons.Size = new System.Drawing.Size(89, 753);
+            this.panLaunchButtons.Size = new System.Drawing.Size(69, 648);
             this.panLaunchButtons.TabIndex = 28;
             this.panLaunchButtons.Visible = false;
             // 
@@ -240,8 +241,8 @@
             this.splitter.Panel2.Controls.Add(this.panLaunchButtons);
             this.splitter.Panel2.Controls.Add(this.panStatus);
             this.splitter.Panel2.Padding = new System.Windows.Forms.Padding(10);
-            this.splitter.Size = new System.Drawing.Size(1253, 930);
-            this.splitter.SplitterDistance = 1143;
+            this.splitter.Size = new System.Drawing.Size(850, 825);
+            this.splitter.SplitterDistance = 760;
             this.splitter.SplitterWidth = 1;
             this.splitter.TabIndex = 29;
             this.splitter.TabStop = false;
@@ -255,7 +256,7 @@
             this.panRocksmithPath.Controls.Add(this.btnRocksmithPath);
             this.panRocksmithPath.Location = new System.Drawing.Point(10, 10);
             this.panRocksmithPath.Name = "panRocksmithPath";
-            this.panRocksmithPath.Size = new System.Drawing.Size(1123, 79);
+            this.panRocksmithPath.Size = new System.Drawing.Size(740, 79);
             this.panRocksmithPath.TabIndex = 31;
             // 
             // flowLayoutPanel
@@ -288,7 +289,7 @@
             this.flowLayoutPanel.Location = new System.Drawing.Point(10, 124);
             this.flowLayoutPanel.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel.Name = "flowLayoutPanel";
-            this.flowLayoutPanel.Size = new System.Drawing.Size(1123, 796);
+            this.flowLayoutPanel.Size = new System.Drawing.Size(740, 691);
             this.flowLayoutPanel.TabIndex = 30;
             this.flowLayoutPanel.Visible = false;
             this.flowLayoutPanel.WrapContents = false;
@@ -693,7 +694,7 @@
             this.panStatus.Location = new System.Drawing.Point(10, 10);
             this.panStatus.Margin = new System.Windows.Forms.Padding(0, 0, 0, 20);
             this.panStatus.Name = "panStatus";
-            this.panStatus.Size = new System.Drawing.Size(89, 157);
+            this.panStatus.Size = new System.Drawing.Size(69, 157);
             this.panStatus.TabIndex = 29;
             // 
             // toolTip
@@ -704,11 +705,17 @@
             this.toolTip.ReshowDelay = 1000;
             this.toolTip.ShowAlways = true;
             // 
+            // flushTimer
+            // 
+            this.flushTimer.Enabled = true;
+            this.flushTimer.Interval = 5000;
+            this.flushTimer.Tick += new System.EventHandler(this.flushTimer_Tick);
+            // 
             // RSTKForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(1253, 930);
+            this.ClientSize = new System.Drawing.Size(850, 825);
             this.Controls.Add(this.splitter);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -770,6 +777,7 @@
         private Marzersoft.Controls.CheckBoxRow checkExitWhenRocksmithTerminated;
         private Marzersoft.Controls.CheckBoxRow checkLaunchAnywhere;
         private Marzersoft.Controls.TextBoxRow tbLaunchCommand;
+        private System.Windows.Forms.Timer flushTimer;
     }
 }
 

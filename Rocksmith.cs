@@ -138,35 +138,6 @@ namespace RSTK
         private FullscreenModes fullscreenMode = FullscreenModes.ExclusiveFullscreen;
 
         /// <summary>
-        /// All screen resolutions supported by rocksmith.
-        /// </summary>
-        public static IReadOnlyList<Tuple<uint, uint>> SupportedResolutions
-        {
-            get { return supportedResolutions.AsReadOnly(); }
-        }
-        private static List<Tuple<uint, uint>> supportedResolutions = new List<Tuple<uint, uint>>
-        {
-            new Tuple<uint, uint>( 640,480 ),
-            new Tuple<uint, uint>( 720,480 ),
-            new Tuple<uint, uint>( 720,576 ),
-            new Tuple<uint, uint>( 800,600 ),
-            new Tuple<uint, uint>( 1024,768 ),
-            new Tuple<uint, uint>( 1152,864 ),
-            new Tuple<uint, uint>( 1280,720 ), //default
-            new Tuple<uint, uint>( 1280,768 ),
-            new Tuple<uint, uint>( 1280,800 ),
-            new Tuple<uint, uint>( 1280,960 ),
-            new Tuple<uint, uint>( 1280,1024 ),
-            new Tuple<uint, uint>( 1360,768 ),
-            new Tuple<uint, uint>( 1366,768 ),
-            new Tuple<uint, uint>( 1440,900 ),
-            new Tuple<uint, uint>( 1600,900 ),
-            new Tuple<uint, uint>( 1600,1024 ),
-            new Tuple<uint, uint>( 1680,1050 ),
-            new Tuple<uint, uint>( 1920,1080 )
-        };
-
-        /// <summary>
         /// Rocksmith.ini ScreenWidth and ScreenHeight
         /// default: 1280, 720
         /// </summary>
@@ -181,19 +152,6 @@ namespace RSTK
                     throw new ArgumentOutOfRangeException("Resolution.Width", "Must be >= 640");
                 if (value.Height < 480)
                     throw new ArgumentOutOfRangeException("Resolution.Height", "Must be >= 480");
-
-                bool found = false;
-                foreach (var res in supportedResolutions)
-                {
-                    if (res.Item1 == value.Width && res.Item2 == value.Height)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                    throw new ArgumentOutOfRangeException("Resolution",
-                        string.Format("{0} x {1} is not a resolution supported by Rocksmith",value.Width,value.Height));
 
                 resolution = value;
             }
