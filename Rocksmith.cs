@@ -14,681 +14,698 @@ using static Marzersoft.Native;
 
 namespace RSTK
 {
-    /// <summary>
-    /// Class representing a Rocksmith executable.
-    /// </summary>
-    public sealed class Rocksmith : IStatefulDisposable
-    {
-        /////////////////////////////////////////////////////////////////////
-        // EVENTS
-        /////////////////////////////////////////////////////////////////////
+	/// <summary>
+	/// Class representing a Rocksmith executable.
+	/// </summary>
+	public sealed class Rocksmith : IStatefulDisposable
+	{
+		/////////////////////////////////////////////////////////////////////
+		// EVENTS
+		/////////////////////////////////////////////////////////////////////
 
-        /// <summary>
-        /// Event invoked when the config values are updated by reading them from Rocksmith.ini.
-        /// </summary>
-        public event Action<Rocksmith> ConfigRead;
+		/// <summary>
+		/// Event invoked when the config values are updated by reading them from Rocksmith.ini.
+		/// </summary>
+		public event Action<Rocksmith> ConfigRead;
 
-        /// <summary>
-        /// Event invoked when the rocksmith executable is detected as currently running.
-        /// </summary>
-        public event Action<Rocksmith> Running;
+		/// <summary>
+		/// Event invoked when the rocksmith executable is detected as currently running.
+		/// </summary>
+		public event Action<Rocksmith> Running;
 
-        /// <summary>
-        /// Event invoked when the rocksmith executable which was running is detected to have been terminated.
-        /// </summary>
-        public event Action<Rocksmith> Terminated;
+		/// <summary>
+		/// Event invoked when the rocksmith executable which was running is detected to have been terminated.
+		/// </summary>
+		public event Action<Rocksmith> Terminated;
 
-        /////////////////////////////////////////////////////////////////////
-        // PROPERTIES/VARIABLES
-        /////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		// PROPERTIES/VARIABLES
+		/////////////////////////////////////////////////////////////////////
 
-        /// <summary>
-        /// Has this wrapper object been disposed?
-        /// </summary>
-        public bool IsDisposed => disposed;
-        private volatile bool disposed = false;
+		/// <summary>
+		/// Has this wrapper object been disposed?
+		/// </summary>
+		public bool IsDisposed => disposed;
+		private volatile bool disposed = false;
 
-        /// <summary>
-        /// Fullscreen modes supported by Rocksmith.
-        /// </summary>
-        public enum FullscreenModes : uint
-        {
-            Windowed = 0,
-            WindowedFullscreen = 1,
-            ExclusiveFullscreen = 2
-        };
+		/// <summary>
+		/// Fullscreen modes supported by Rocksmith.
+		/// </summary>
+		public enum FullscreenModes : uint
+		{
+			Windowed = 0,
+			WindowedFullscreen = 1,
+			ExclusiveFullscreen = 2
+		};
 
-        /// <summary>
-        /// Full path to the game's executable.
-        /// </summary>
-        public readonly string GamePath;
+		/// <summary>
+		/// Full path to the game's executable.
+		/// </summary>
+		public readonly string GamePath;
 
-        /// <summary>
-        /// Full path to the folder containing game's executable and ini file.
-        /// </summary>
-        public readonly string GameDirectory;
+		/// <summary>
+		/// Full path to the folder containing game's executable and ini file.
+		/// </summary>
+		public readonly string GameDirectory;
 
-        /// <summary>
-        /// Full path to the game's ini file.
-        /// </summary>
-        public readonly string ConfigPath;
+		/// <summary>
+		/// Full path to the game's ini file.
+		/// </summary>
+		public readonly string ConfigPath;
 
-        /// <summary>
-        /// Steam app id for this version of rocksmith.
-        /// </summary>
-        public readonly uint AppID;
+		/// <summary>
+		/// Steam app id for this version of rocksmith.
+		/// </summary>
+		public readonly uint AppID;
 
-        /// <summary>
-        /// Command to run this version of rocksmith via Steam.
-        /// </summary>
-        public string SteamRunCommand => string.Format("steam://run/{0}", AppID);
+		/// <summary>
+		/// Command to run this version of rocksmith via Steam.
+		/// </summary>
+		public string SteamRunCommand => string.Format("steam://run/{0}", AppID);
 
-        private Thread thread = null;
-        private readonly object threadLock = new object();
+		private Thread thread = null;
+		private readonly object threadLock = new object();
 
-        /// <summary>
-        /// Rocksmith game process.
-        /// </summary>
-        private Process GameProcess
-        {
-            get { return process; }
-            set
-            {
-                if (process == value
-                    || (process != null && value != null && process.Id == value.Id))
-                    return;
+		/// <summary>
+		/// Rocksmith game process.
+		/// </summary>
+		private Process GameProcess
+		{
+			get { return process; }
+			set
+			{
+				if (ReferenceEquals(process, value))
+					return;
+				if (process != null && value != null && process.Id == value.Id)
+					return;
 
-                var old = process;
-                process = value;
-                if (old != null)
-                {
-                    Logger.I("Rocksmith[{0}] exited.", old.Id);
-                    lastRunningTime = runningTimer.Seconds;
-                    old.Dispose();
-                    Terminated?.Invoke(this);
-                }
+				var old = process;
+				process = value;
+				if (old != null)
+				{
+					lastRunningTime = runningTimer.Seconds;
+					try
+					{
+						Logger.I("Rocksmith[{0}] exited.", old.Id);
+					}
+					catch (InvalidOperationException)
+					{
+						Logger.I("Rocksmith exited.");
+					}
+					finally
+					{
+						old.Dispose();
+						Terminated?.Invoke(this);
+					}
+				}
 
-                if (process != null)
-                {
-                    Logger.I("Rocksmith[{0}] running.", process.Id);
-                    runningTimer.Reset();
-                    Running?.Invoke(this);
-                    highFrequencyPollMilliseconds = 0;
-                }
-            }
-        }
-        private Process process;
+				if (process != null)
+				{
+					Logger.I("Rocksmith[{0}] running.", process.Id);
+					runningTimer.Reset();
+					Running?.Invoke(this);
+					highFrequencyPollMilliseconds = 0;
+				}
+			}
+		}
+		private Process process;
 
-        /// <summary>
-        /// Rocksmith.ini Fullscreen
-        /// default: ExclusiveFullscreen (2)
-        /// </summary>
-        public FullscreenModes FullscreenMode
-        {
-            get { return fullscreenMode; }
-            set
-            {
-                this.DisposeCheck();
-                if (value > FullscreenModes.ExclusiveFullscreen)
-                    throw new ArgumentOutOfRangeException("FullscreenMode");
+		/// <summary>
+		/// Rocksmith.ini Fullscreen
+		/// default: ExclusiveFullscreen (2)
+		/// </summary>
+		public FullscreenModes FullscreenMode
+		{
+			get { return fullscreenMode; }
+			set
+			{
+				this.DisposeCheck();
+				if (value > FullscreenModes.ExclusiveFullscreen)
+					throw new ArgumentOutOfRangeException("FullscreenMode");
 
-                fullscreenMode = value;
-            }
-        }
-        private FullscreenModes fullscreenMode = FullscreenModes.ExclusiveFullscreen;
+				fullscreenMode = value;
+			}
+		}
+		private FullscreenModes fullscreenMode = FullscreenModes.ExclusiveFullscreen;
 
-        /// <summary>
-        /// Rocksmith.ini ScreenWidth and ScreenHeight
-        /// default: 1280, 720
-        /// </summary>
-        public Size Resolution
-        {
-            get { return resolution; }
-            set
-            {
-                this.DisposeCheck();
+		/// <summary>
+		/// Rocksmith.ini ScreenWidth and ScreenHeight
+		/// default: 1280, 720
+		/// </summary>
+		public Size Resolution
+		{
+			get { return resolution; }
+			set
+			{
+				this.DisposeCheck();
 
-                if (value.Width < 640)
-                    throw new ArgumentOutOfRangeException("Resolution.Width", "Must be >= 640");
-                if (value.Height < 480)
-                    throw new ArgumentOutOfRangeException("Resolution.Height", "Must be >= 480");
+				if (value.Width < 640)
+					throw new ArgumentOutOfRangeException("Resolution.Width", "Must be >= 640");
+				if (value.Height < 480)
+					throw new ArgumentOutOfRangeException("Resolution.Height", "Must be >= 480");
 
-                resolution = value;
-            }
-        }
-        private Size resolution = new Size(1280, 720);
+				resolution = value;
+			}
+		}
+		private Size resolution = new Size(1280, 720);
 
-        /// <summary>
-        /// Rocksmith.ini ExclusiveMode
-        /// default: true
-        /// </summary>
-        public bool ExclusiveMode
-        {
-            get { return exclusive; }
-            set
-            {
-                this.DisposeCheck();
-                exclusive = value;
-            }
-        }
-        private bool exclusive = true;
+		/// <summary>
+		/// Rocksmith.ini ExclusiveMode
+		/// default: true
+		/// </summary>
+		public bool ExclusiveMode
+		{
+			get { return exclusive; }
+			set
+			{
+				this.DisposeCheck();
+				exclusive = value;
+			}
+		}
+		private bool exclusive = true;
 
-        /// <summary>
-        /// Rocksmith.ini MaxOutputBufferSize
-        /// default: 0
-        /// </summary>
-        public uint MaxOutputBufferSize
-        {
-            get { return maxOutputBufferSize; }
-            set
-            {
-                this.DisposeCheck();
-                maxOutputBufferSize = value;
-            }
-        }
-        private uint maxOutputBufferSize = 0;
+		/// <summary>
+		/// Rocksmith.ini MaxOutputBufferSize
+		/// default: 0
+		/// </summary>
+		public uint MaxOutputBufferSize
+		{
+			get { return maxOutputBufferSize; }
+			set
+			{
+				this.DisposeCheck();
+				maxOutputBufferSize = value;
+			}
+		}
+		private uint maxOutputBufferSize = 0;
 
-        /// <summary>
-        /// Rocksmith.ini LatencyBuffer
-        /// default: 4
-        /// </summary>
-        public uint LatencyBuffer
-        {
-            get { return latencyBuffer; }
-            set
-            {
-                this.DisposeCheck();
-                if (value == 0 || value > 16)
-                    throw new ArgumentOutOfRangeException("LatencyBuffer", "must be between 1 and 16 (inclusive)");
-                latencyBuffer = value;
-            }
-        }
-        private uint latencyBuffer = 4;
+		/// <summary>
+		/// Rocksmith.ini LatencyBuffer
+		/// default: 4
+		/// </summary>
+		public uint LatencyBuffer
+		{
+			get { return latencyBuffer; }
+			set
+			{
+				this.DisposeCheck();
+				if (value == 0 || value > 16)
+					throw new ArgumentOutOfRangeException("LatencyBuffer", "must be between 1 and 16 (inclusive)");
+				latencyBuffer = value;
+			}
+		}
+		private uint latencyBuffer = 4;
 
-        /// <summary>
-        /// Rocksmith.ini Win32UltraLowLatencyMode
-        /// default: true
-        /// </summary>
-        public bool Win32UltraLowLatencyMode
-        {
-            get { return win32LowLatency; }
-            set
-            {
-                this.DisposeCheck();
-                win32LowLatency = value;
-            }
-        }
-        private bool win32LowLatency = true;
+		/// <summary>
+		/// Rocksmith.ini Win32UltraLowLatencyMode
+		/// default: true
+		/// </summary>
+		public bool Win32UltraLowLatencyMode
+		{
+			get { return win32LowLatency; }
+			set
+			{
+				this.DisposeCheck();
+				win32LowLatency = value;
+			}
+		}
+		private bool win32LowLatency = true;
 
-        /// <summary>
-        /// Approximate effective total latency in ms.
-        /// (see: http://forums.ubi.com/showthread.php/719817-A-guide-to-achieving-low-latency-in-Rocksmith-on-PC-Forums)
-        /// </summary>
-        public static double CalulateEffectiveLatency(uint maxOutputBufferSize, uint latencyBuffer)
-        {
-            return ((maxOutputBufferSize == 0 ? 1024 : maxOutputBufferSize) * latencyBuffer) / 16.0;
-        }
+		/// <summary>
+		/// Approximate effective total latency in ms.
+		/// (see: http://forums.ubi.com/showthread.php/719817-A-guide-to-achieving-low-latency-in-Rocksmith-on-PC-Forums)
+		/// </summary>
+		public static double CalulateEffectiveLatency(uint maxOutputBufferSize, uint latencyBuffer)
+		{
+			return ((maxOutputBufferSize == 0 ? 1024 : maxOutputBufferSize) * latencyBuffer) / 16.0;
+		}
 
-        /// <summary>
-        /// Approximate effective total latency in ms for the game given the current settings.
-        /// (see: http://forums.ubi.com/showthread.php/719817-A-guide-to-achieving-low-latency-in-Rocksmith-on-PC-Forums)
-        /// </summary>
-        public double EffectiveLatency
-        {
-            get { return CalulateEffectiveLatency(maxOutputBufferSize, latencyBuffer); }
-        }
+		/// <summary>
+		/// Approximate effective total latency in ms for the game given the current settings.
+		/// (see: http://forums.ubi.com/showthread.php/719817-A-guide-to-achieving-low-latency-in-Rocksmith-on-PC-Forums)
+		/// </summary>
+		public double EffectiveLatency
+		{
+			get { return CalulateEffectiveLatency(maxOutputBufferSize, latencyBuffer); }
+		}
 
-        /// <summary>
-        /// Remove game window borders when in Windowed?
-        /// </summary>
-        public bool EmulateFullscreenWhenWindowed
-        {
-            get { return emulatedFullscreen; }
-            set
-            {
-                this.DisposeCheck();
-                emulatedFullscreen = value;
-            }
-        }
-        private volatile bool emulatedFullscreen = false;
-        private Size emulatedSizeDelta = Size.Empty;
+		/// <summary>
+		/// Remove game window borders when in Windowed?
+		/// </summary>
+		public bool EmulateFullscreenWhenWindowed
+		{
+			get { return emulatedFullscreen; }
+			set
+			{
+				this.DisposeCheck();
+				emulatedFullscreen = value;
+			}
+		}
+		private volatile bool emulatedFullscreen = false;
+		private Size emulatedSizeDelta = Size.Empty;
 
-        /// <summary>
-        /// Rocksmith.ini EnableMicrophone
-        /// default: true
-        /// </summary>
-        public bool EnableMicrophone
-        {
-            get { return enableMicrophone; }
-            set
-            {
-                this.DisposeCheck();
-                enableMicrophone = value;
-            }
-        }
-        private bool enableMicrophone = true;
+		/// <summary>
+		/// Rocksmith.ini EnableMicrophone
+		/// default: true
+		/// </summary>
+		public bool EnableMicrophone
+		{
+			get { return enableMicrophone; }
+			set
+			{
+				this.DisposeCheck();
+				enableMicrophone = value;
+			}
+		}
+		private bool enableMicrophone = true;
 
-        /// <summary>
-        /// Rocksmith.ini DumpAudioLog
-        /// default: false
-        /// </summary>
-        public bool DumpAudioLog
-        {
-            get { return dumpAudioLog; }
-            set
-            {
-                this.DisposeCheck();
-                dumpAudioLog = value;
-            }
-        }
-        private bool dumpAudioLog = false;
+		/// <summary>
+		/// Rocksmith.ini DumpAudioLog
+		/// default: false
+		/// </summary>
+		public bool DumpAudioLog
+		{
+			get { return dumpAudioLog; }
+			set
+			{
+				this.DisposeCheck();
+				dumpAudioLog = value;
+			}
+		}
+		private bool dumpAudioLog = false;
 
-        /// <summary>
-        /// Gets/sets the window styles of the rocksmith window.
-        /// </summary>
-        private WindowStyles WindowStyles
-        {
-            get { return process.MainWindowHandle.GetStyles(); }
-            set { process.MainWindowHandle.SetStyles(value); }
-        }
+		/// <summary>
+		/// Gets/sets the window styles of the rocksmith window.
+		/// </summary>
+		private WindowStyles WindowStyles
+		{
+			get { return process.MainWindowHandle.GetStyles(); }
+			set { process.MainWindowHandle.SetStyles(value); }
+		}
 
-        /// <summary>
-        /// Gets/sets the window styles Ex of the rocksmith window.
-        /// </summary>
-        private WindowStylesEx WindowStylesEx
-        {
-            get { return process.MainWindowHandle.GetStylesEx(); }
-            set { process.MainWindowHandle.SetStylesEx(value); }
-        }
+		/// <summary>
+		/// Gets/sets the window styles Ex of the rocksmith window.
+		/// </summary>
+		private WindowStylesEx WindowStylesEx
+		{
+			get { return process.MainWindowHandle.GetStylesEx(); }
+			set { process.MainWindowHandle.SetStylesEx(value); }
+		}
 
-        /// <summary>
-        /// Gets/sets the bounds of the rocksmith window.
-        /// </summary>
-        private Rectangle WindowBounds
-        {
-            get { return process.MainWindowHandle.GetWindowRect(); }
-            set
-            {
-                if (!value.Equals(WindowBounds))
-                {
-                    process.MainWindowHandle.SetWindowPos(IntPtr.Zero, value.Left, value.Top, value.Width, value.Height,
-                        SetWindowPosFlags.NoZOrder | SetWindowPosFlags.FrameChanged | SetWindowPosFlags.NoActivate | SetWindowPosFlags.NoCopyBits);
-                }
-            }
-        }
+		/// <summary>
+		/// Gets/sets the bounds of the rocksmith window.
+		/// </summary>
+		private Rectangle WindowBounds
+		{
+			get { return process.MainWindowHandle.GetWindowRect(); }
+			set
+			{
+				if (!value.Equals(WindowBounds))
+				{
+					process.MainWindowHandle.SetWindowPos(IntPtr.Zero, value.Left, value.Top, value.Width, value.Height,
+						SetWindowPosFlags.NoZOrder | SetWindowPosFlags.FrameChanged | SetWindowPosFlags.NoActivate | SetWindowPosFlags.NoCopyBits);
+				}
+			}
+		}
 
-        /// <summary>
-        /// Gets/sets the size of the rocksmith window.
-        /// </summary>
-        private Size WindowSize
-        {
-            get { return process.MainWindowHandle.GetWindowRect().Size; }
-            set
-            {
-                if (!value.Equals(WindowSize))
-                {
-                    process.MainWindowHandle.SetWindowPos(IntPtr.Zero, 0, 0, value.Width, value.Height,
-                    SetWindowPosFlags.NoMove | SetWindowPosFlags.NoZOrder | SetWindowPosFlags.FrameChanged
-                    | SetWindowPosFlags.NoActivate | SetWindowPosFlags.NoCopyBits);
-                }
-            }
-        }
+		/// <summary>
+		/// Gets/sets the size of the rocksmith window.
+		/// </summary>
+		private Size WindowSize
+		{
+			get { return process.MainWindowHandle.GetWindowRect().Size; }
+			set
+			{
+				if (!value.Equals(WindowSize))
+				{
+					process.MainWindowHandle.SetWindowPos(IntPtr.Zero, 0, 0, value.Width, value.Height,
+					SetWindowPosFlags.NoMove | SetWindowPosFlags.NoZOrder | SetWindowPosFlags.FrameChanged
+					| SetWindowPosFlags.NoActivate | SetWindowPosFlags.NoCopyBits);
+				}
+			}
+		}
 
-        /// <summary>
-        /// Gets/sets the position of the rocksmith window.
-        /// </summary>
-        private Point WindowPosition
-        {
-            get { return process.MainWindowHandle.GetWindowRect().Location; }
-            set
-            {
-                if (!value.Equals(WindowPosition))
-                {
-                    process.MainWindowHandle.SetWindowPos(IntPtr.Zero, value.X, value.Y, 0, 0,
-                        SetWindowPosFlags.NoSize | SetWindowPosFlags.NoZOrder
-                        | SetWindowPosFlags.NoActivate | SetWindowPosFlags.NoCopyBits);
-                }
-            }
-        }
+		/// <summary>
+		/// Gets/sets the position of the rocksmith window.
+		/// </summary>
+		private Point WindowPosition
+		{
+			get { return process.MainWindowHandle.GetWindowRect().Location; }
+			set
+			{
+				if (!value.Equals(WindowPosition))
+				{
+					process.MainWindowHandle.SetWindowPos(IntPtr.Zero, value.X, value.Y, 0, 0,
+						SetWindowPosFlags.NoSize | SetWindowPosFlags.NoZOrder
+						| SetWindowPosFlags.NoActivate | SetWindowPosFlags.NoCopyBits);
+				}
+			}
+		}
 
-        /// <summary>
-        /// Gets/sets the topmost state of the rocksmith window.
-        /// </summary>
-        private bool TopMost
-        {
-            get { return WindowStylesEx.HasFlag(WindowStylesEx.TopMost); }
-            set
-            {
-                if (value == TopMost)
-                    return;
+		/// <summary>
+		/// Gets/sets the topmost state of the rocksmith window.
+		/// </summary>
+		private bool TopMost
+		{
+			get { return WindowStylesEx.HasFlag(WindowStylesEx.TopMost); }
+			set
+			{
+				if (value == TopMost)
+					return;
 
-                if (!value)
-                {
-                    WindowStylesEx &= ~(WindowStylesEx.TopMost);
-                    process.MainWindowHandle.SetWindowPos(new IntPtr(-2), 0, 0, 0, 0,
-                        SetWindowPosFlags.NoSize | SetWindowPosFlags.NoMove
-                        | SetWindowPosFlags.NoActivate | SetWindowPosFlags.NoCopyBits);
-                }
-                else
-                {
-                    WindowStylesEx |= WindowStylesEx.TopMost;
-                    process.MainWindowHandle.SetWindowPos(new IntPtr(-1), 0, 0, 0, 0,
-                        SetWindowPosFlags.NoSize | SetWindowPosFlags.NoMove
-                        | SetWindowPosFlags.NoActivate | SetWindowPosFlags.NoCopyBits);
-                }
+				if (!value)
+				{
+					WindowStylesEx &= ~(WindowStylesEx.TopMost);
+					process.MainWindowHandle.SetWindowPos(new IntPtr(-2), 0, 0, 0, 0,
+						SetWindowPosFlags.NoSize | SetWindowPosFlags.NoMove
+						| SetWindowPosFlags.NoActivate | SetWindowPosFlags.NoCopyBits);
+				}
+				else
+				{
+					WindowStylesEx |= WindowStylesEx.TopMost;
+					process.MainWindowHandle.SetWindowPos(new IntPtr(-1), 0, 0, 0, 0,
+						SetWindowPosFlags.NoSize | SetWindowPosFlags.NoMove
+						| SetWindowPosFlags.NoActivate | SetWindowPosFlags.NoCopyBits);
+				}
 
-            }
-        }
+			}
+		}
 
-        /// <summary>
-        /// Remaining duration of high-frequency polling period.
-        /// </summary>
-        private volatile int highFrequencyPollMilliseconds = 0;
+		/// <summary>
+		/// Remaining duration of high-frequency polling period.
+		/// </summary>
+		private volatile int highFrequencyPollMilliseconds = 0;
 
-        /// <summary>
-        /// Directory watcher for monitoring Rocksmith.ini changes.
-        /// </summary>
-        private readonly FileSystemWatcher directoryWatcher;
+		/// <summary>
+		/// Directory watcher for monitoring Rocksmith.ini changes.
+		/// </summary>
+		private readonly FileSystemWatcher directoryWatcher;
 
-        /// <summary>
-        /// Amount of time, in seconds, rocksmith has been running for.
-        /// If Rocksmith is not running, returns the length of the most recent session.
-        /// </summary>
-        public double RunningTime
-        {
-            get { return process != null ? runningTimer.Seconds : lastRunningTime; }
-        }
-        private readonly Marzersoft.Timer runningTimer = new Marzersoft.Timer();
-        private double lastRunningTime = 0.0;
+		/// <summary>
+		/// Amount of time, in seconds, rocksmith has been running for.
+		/// If Rocksmith is not running, returns the length of the most recent session.
+		/// </summary>
+		public double RunningTime
+		{
+			get { return process != null ? runningTimer.Seconds : lastRunningTime; }
+		}
+		private readonly Marzersoft.Timer runningTimer = new Marzersoft.Timer();
+		private double lastRunningTime = 0.0;
 
-        /////////////////////////////////////////////////////////////////////
-        // CONSTRUCTION/INITIALIZATION/DESTRUCTION
-        /////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		// CONSTRUCTION/INITIALIZATION/DESTRUCTION
+		/////////////////////////////////////////////////////////////////////
 
-        public Rocksmith(string gameExecutablePath)
-        {
-            //paths
-            if ((gameExecutablePath ?? "").Trim().Length == 0)
-                throw new ArgumentOutOfRangeException("gameExecutablePath", "cannot be blank");
-            if (!File.Exists(GamePath = gameExecutablePath.ExpandPath()))
-                throw new FileNotFoundException("game executable not found", GamePath);
-            var path = GamePath.ToLower();
-            if (!Path.HasExtension(path) || !Path.GetExtension(path).Equals(".exe"))
-                throw new ArgumentOutOfRangeException("gameExecutablePath", "must be an exe");
-            var exe = Path.GetFileNameWithoutExtension(path);
-            if ((AppID = exe.Equals("rocksmith") ? 205190u : (exe.Equals("rocksmith2014") ? 221680u : 0u)) == 0u)
-                throw new ArgumentOutOfRangeException("gameExecutablePath", "must be Rocksmith or Rocksmith2014");
-            if (!Directory.Exists(GameDirectory = Path.GetDirectoryName(GamePath))) //shouldn't happen (?)
-                throw new DirectoryNotFoundException("game directory not found");
-            ConfigPath = Path.Combine(GameDirectory, "Rocksmith.ini");
+		public Rocksmith(string gameExecutablePath)
+		{
+			//paths
+			if ((gameExecutablePath ?? "").Trim().Length == 0)
+				throw new ArgumentOutOfRangeException("gameExecutablePath", "cannot be blank");
+			if (!File.Exists(GamePath = gameExecutablePath.ExpandPath()))
+				throw new FileNotFoundException("game executable not found", GamePath);
+			var path = GamePath.ToLower();
+			if (!Path.HasExtension(path) || !Path.GetExtension(path).Equals(".exe"))
+				throw new ArgumentOutOfRangeException("gameExecutablePath", "must be an exe");
+			var exe = Path.GetFileNameWithoutExtension(path);
+			if ((AppID = exe.Equals("rocksmith") ? 205190u : (exe.Equals("rocksmith2014") ? 221680u : 0u)) == 0u)
+				throw new ArgumentOutOfRangeException("gameExecutablePath", "must be Rocksmith or Rocksmith2014");
+			if (!Directory.Exists(GameDirectory = Path.GetDirectoryName(GamePath))) //shouldn't happen (?)
+				throw new DirectoryNotFoundException("game directory not found");
+			ConfigPath = Path.Combine(GameDirectory, "Rocksmith.ini");
 
-            //read intial config from ini file (or load defaults)
-            ReadConfig();
+			//read intial config from ini file (or load defaults)
+			ReadConfig();
 
-            //create watcher to monitor for external config changes (by the game)
-            directoryWatcher = new FileSystemWatcher(GameDirectory, "Rocksmith.ini");
-            directoryWatcher.IncludeSubdirectories = false;
-            directoryWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
-            directoryWatcher.Created += ConfigChanged;
-            directoryWatcher.Changed += ConfigChanged;
-            directoryWatcher.Deleted += ConfigChanged;
-            directoryWatcher.EnableRaisingEvents = true;
+			//create watcher to monitor for external config changes (by the game)
+			directoryWatcher = new FileSystemWatcher(GameDirectory, "Rocksmith.ini");
+			directoryWatcher.IncludeSubdirectories = false;
+			directoryWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+			directoryWatcher.Created += ConfigChanged;
+			directoryWatcher.Changed += ConfigChanged;
+			directoryWatcher.Deleted += ConfigChanged;
+			directoryWatcher.EnableRaisingEvents = true;
 
-            //launch monitoring thread
-            thread = new Thread(() =>
-            {
-                //initial sleep so caller can bind events etc
-                //(ugly but meh)
-                Thread.Sleep(250);
-                if (disposed)
-                    return;
+			//launch monitoring thread
+			thread = new Thread(() =>
+			{
+				//initial sleep so caller can bind events etc
+				//(ugly but meh)
+				Thread.Sleep(250);
+				if (disposed)
+					return;
 
-                //poll
-                while (!disposed)
-                {
-                    //sleep for 500ms
-                    ThreadExtensions.Sleep(500, () => disposed);
-                    if (disposed)
-                        break;
+				//poll
+				while (!disposed)
+				{
+					//sleep for 500ms
+					ThreadExtensions.Sleep(500, () => disposed);
+					if (disposed)
+						break;
 
-                    //refresh process
-                    bool wasRunning = process != null;
-                    RefreshProcess();
-                    bool running = process != null;
+					//refresh process
+					bool wasRunning = process != null;
+					RefreshProcess();
+					bool running = process != null;
 
-                    //if no process, sleep for another 4500 milliseconds
-                    //(so we only poll every 5 seconds when no game is running)
-                    //...unless highFrequencyPollSeconds is > 0;
-                    if (!running)
-                    {
-                        if (highFrequencyPollMilliseconds > 0)
-                            highFrequencyPollMilliseconds -= 500;
-                        else
-                        {
-                            ThreadExtensions.Sleep(4500, () => disposed);
-                            if (disposed)
-                                break;
-                        }
+					//if no process, sleep for another 4500 milliseconds
+					//(so we only poll every 5 seconds when no game is running)
+					//...unless highFrequencyPollSeconds is > 0;
+					if (!running)
+					{
+						if (highFrequencyPollMilliseconds > 0)
+							highFrequencyPollMilliseconds -= 500;
+						else
+						{
+							ThreadExtensions.Sleep(4500, () => disposed);
+							if (disposed)
+								break;
+						}
 
-                        continue;
-                    }
+						continue;
+					}
 
-                    //emulated fullscreen
-                    if (fullscreenMode == FullscreenModes.Windowed && App.IsAdministrator)
-                    {
-                        if (emulatedFullscreen)
-                        {
-                            //calculate size differential (for reverting)
-                            if (emulatedSizeDelta.IsEmpty)
-                            {
-                                var size = WindowSize;
-                                emulatedSizeDelta = Size.Subtract(size, resolution);
-                            }
+					//emulated fullscreen
+					if (fullscreenMode == FullscreenModes.Windowed && App.IsAdministrator)
+					{
+						if (emulatedFullscreen)
+						{
+							//calculate size differential (for reverting)
+							if (emulatedSizeDelta.IsEmpty)
+							{
+								var size = WindowSize;
+								emulatedSizeDelta = Size.Subtract(size, resolution);
+							}
 
-                            //change frame and z-order
-                            WindowStyles = WindowStyles.ClipSiblings | WindowStyles.Visible | WindowStyles.PopupWindow;
-                            TopMost = true;
-                            WindowStylesEx = WindowStylesEx.TopMost;
-                            
-                            //move and resize if necessary
-                            var currentBounds = WindowBounds;
-                            var screenBounds = Screen.FromRectangle(currentBounds).Bounds;
-                            var targetBounds = new Rectangle(0, 0, resolution.Width + 2, resolution.Height + 2);
-                            WindowBounds = targetBounds.AlignCenter(screenBounds.Center());
-                        }
-                        else
-                            RevertEmulatedFullscreen();
-                    }
-                }
+							//change frame and z-order
+							WindowStyles = WindowStyles.ClipSiblings | WindowStyles.Visible | WindowStyles.PopupWindow;
+							TopMost = true;
+							WindowStylesEx = WindowStylesEx.TopMost;
+							
+							//move and resize if necessary
+							var currentBounds = WindowBounds;
+							var screenBounds = Screen.FromRectangle(currentBounds).Bounds;
+							var targetBounds = new Rectangle(0, 0, resolution.Width + 2, resolution.Height + 2);
+							WindowBounds = targetBounds.AlignCenter(screenBounds.Center());
+						}
+						else
+							RevertEmulatedFullscreen();
+					}
+				}
 
-                //revert emulated fullscreen on exit
-                if (fullscreenMode == FullscreenModes.Windowed && App.IsAdministrator)
-                    RevertEmulatedFullscreen();
-            });
-            thread.IsBackground = false;
-            thread.Start();
-        }
+				//revert emulated fullscreen on exit
+				if (fullscreenMode == FullscreenModes.Windowed && App.IsAdministrator)
+					RevertEmulatedFullscreen();
+			});
+			thread.IsBackground = false;
+			thread.Start();
+		}
 
-        private void RevertEmulatedFullscreen()
-        {
-            if (process == null || emulatedSizeDelta.IsEmpty)
-                return;
+		private void RevertEmulatedFullscreen()
+		{
+			if (process == null || emulatedSizeDelta.IsEmpty)
+				return;
 
-            WindowStyles = WindowStyles.MinimizeBox | WindowStyles.SystemMenu | WindowStyles.Caption
-                | WindowStyles.ClipSiblings | WindowStyles.Visible;
-            TopMost = false;
-            WindowStylesEx = WindowStylesEx.WindowEdge;
-            WindowSize = Size.Add(resolution, emulatedSizeDelta);
-        }
+			WindowStyles = WindowStyles.MinimizeBox | WindowStyles.SystemMenu | WindowStyles.Caption
+				| WindowStyles.ClipSiblings | WindowStyles.Visible;
+			TopMost = false;
+			WindowStylesEx = WindowStylesEx.WindowEdge;
+			WindowSize = Size.Add(resolution, emulatedSizeDelta);
+		}
 
-        /////////////////////////////////////////////////////////////////////
-        // FINDING ROCKSMITH PROCESS
-        /////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		// FINDING ROCKSMITH PROCESS
+		/////////////////////////////////////////////////////////////////////
 
-        private void RefreshProcess()
-        {
-            //administrators can access all process info,
-            //so can simply refresh the existing instance
-            if (App.IsAdministrator)
-            {
-                if (process != null)
-                {
-                    if (!process.HasExited)
-                        process.Refresh();
-                    if (process.HasExited)
-                        GameProcess = null; //property fires events
-                }
-                if (process != null)
-                    return;
-            }
+		private void RefreshProcess()
+		{
+			//administrators can access all process info,
+			//so can simply refresh the existing instance
+			if (App.IsAdministrator && process != null)
+			{
+				try
+				{
+					if (!process.HasExited)
+						process.Refresh();
+					if (process.HasExited)
+						GameProcess = null; //property fires events
+					if (process != null)
+						return;
+				}
+				catch (InvalidOperationException)
+				{
+					// fallback to brute-force method
+				}
+			}
 
-            //get processes
-            var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(GamePath));
-            if (processes.Length == 0)
-            {
-                GameProcess = null;
-                return;
-            }
+			//get processes
+			var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(GamePath)).ToList();
+			if (processes.Count == 0)
+			{
+				GameProcess = null;
+				return;
+			}
 
-            //update rocksmith process
-            if (App.IsAdministrator)
-            {
-                GameProcess = processes.Where((p) =>
-                {
-                    try
-                    {
-                        return !p.HasExited
-                        && p.MainWindowHandle != IntPtr.Zero
-                        && p.MainModule != null
-                        && p.MainModule.FileName.EqualPath(GamePath);
-                    }
-                    catch (Exception) { return false; }
-                }).FirstOrDefault();
-            }
-            else
-                GameProcess = processes.FirstOrDefault();
+			//update rocksmith process
+			if (App.IsAdministrator)
+			{
+				GameProcess = processes.Where((p) =>
+				{
+					try
+					{
+						return !p.HasExited
+						&& p.MainWindowHandle != IntPtr.Zero
+						&& p.MainModule != null
+						&& p.MainModule.FileName.EqualPath(GamePath);
+					}
+					catch (Exception) { return false; }
+				}).FirstOrDefault();
+			}
+			else
+				GameProcess = processes.FirstOrDefault();
 
-            //cleanup
-            processes.DisposeAll();
-        }
+			//cleanup
+			if (process != null)
+				processes.Remove(process);
+			processes.DisposeAll();
+		}
 
-        /////////////////////////////////////////////////////////////////////
-        // READ CONFIG FILE
-        /////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		// READ CONFIG FILE
+		/////////////////////////////////////////////////////////////////////
 
-        /// <summary>
-        /// Event handler for detecting config file changes made when the game is running.
-        /// </summary>
-        private void ConfigChanged(object watcher, FileSystemEventArgs e)
-        {
-            if (process == null)
-                return;
-            ReadConfig();
-        }
+		/// <summary>
+		/// Event handler for detecting config file changes made when the game is running.
+		/// </summary>
+		private void ConfigChanged(object watcher, FileSystemEventArgs e)
+		{
+			if (process == null)
+				return;
+			ReadConfig();
+		}
 
-        /// <summary>
-        /// Reads rocksmith.ini and updates config values accordingly.
-        /// </summary>
-        private void ReadConfig()
-        {
-            if (File.Exists(ConfigPath))
-            {
-                var ini = ConfigPath.TryReadIniFile();
+		/// <summary>
+		/// Reads rocksmith.ini and updates config values accordingly.
+		/// </summary>
+		private void ReadConfig()
+		{
+			if (File.Exists(ConfigPath))
+			{
+				var ini = ConfigPath.TryReadIniFile();
 
-                enableMicrophone = ini.ReadBool("Audio", "EnableMicrophone", true);
-                dumpAudioLog = ini.ReadBool("Audio", "DumpAudioLog", false);
-                exclusive = ini.ReadBool("Audio", "ExclusiveMode", true);
-                latencyBuffer = ini.ReadUint("Audio", "LatencyBuffer", 4);
-                maxOutputBufferSize = ini.ReadUint("Audio", "MaxOutputBufferSize", 0);
-                win32LowLatency = ini.ReadBool("Audio", "Win32UltraLowLatencyMode", true);
-                fullscreenMode = (FullscreenModes)ini.ReadUint("Renderer.Win32", "Fullscreen",
-                    (uint)FullscreenModes.ExclusiveFullscreen);
-                resolution = new Size(
-                    (int)ini.ReadUint("Renderer.Win32", "ScreenWidth", 0),
-                    (int)ini.ReadUint("Renderer.Win32", "ScreenHeight", 0));
-                if (resolution.Width == 0 || resolution.Height == 0)
-                    resolution = new Size(1280, 720);
-            }
-            else
-            {
-                enableMicrophone = true;
-                dumpAudioLog = false;
-                exclusive = true;
-                latencyBuffer = 4;
-                maxOutputBufferSize = 0;
-                win32LowLatency = true;
-                fullscreenMode = FullscreenModes.ExclusiveFullscreen;
-                resolution = new Size(1280, 720);
-            }
+				enableMicrophone = ini.ReadBool("Audio", "EnableMicrophone", true);
+				dumpAudioLog = ini.ReadBool("Audio", "DumpAudioLog", false);
+				exclusive = ini.ReadBool("Audio", "ExclusiveMode", true);
+				latencyBuffer = ini.ReadUint("Audio", "LatencyBuffer", 4);
+				maxOutputBufferSize = ini.ReadUint("Audio", "MaxOutputBufferSize", 0);
+				win32LowLatency = ini.ReadBool("Audio", "Win32UltraLowLatencyMode", true);
+				fullscreenMode = (FullscreenModes)ini.ReadUint("Renderer.Win32", "Fullscreen",
+					(uint)FullscreenModes.ExclusiveFullscreen);
+				resolution = new Size(
+					(int)ini.ReadUint("Renderer.Win32", "ScreenWidth", 0),
+					(int)ini.ReadUint("Renderer.Win32", "ScreenHeight", 0));
+				if (resolution.Width == 0 || resolution.Height == 0)
+					resolution = new Size(1280, 720);
+			}
+			else
+			{
+				enableMicrophone = true;
+				dumpAudioLog = false;
+				exclusive = true;
+				latencyBuffer = 4;
+				maxOutputBufferSize = 0;
+				win32LowLatency = true;
+				fullscreenMode = FullscreenModes.ExclusiveFullscreen;
+				resolution = new Size(1280, 720);
+			}
 #if DEBUG
-            Logger.V("Rocksmith.ini read.");
+			Logger.V("Rocksmith.ini read.");
 #endif
-            ConfigRead?.Invoke(this);
-        }
+			ConfigRead?.Invoke(this);
+		}
 
 
-        /////////////////////////////////////////////////////////////////////
-        // WRITING CONFIG FILE
-        /////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		// WRITING CONFIG FILE
+		/////////////////////////////////////////////////////////////////////
 
-        public void WriteConfig()
-        {
-            //create ini file
-            var ini = new IniData();
-            ini.Configuration.AssigmentSpacer = "";
-            ini.Sections.AddSection("Audio");
-            ini["Audio"]["EnableMicrophone"] = enableMicrophone ? "1" : "0";
-            ini["Audio"]["DumpAudioLog"] = dumpAudioLog ? "1" : "0";
-            ini["Audio"]["ExclusiveMode"] = exclusive ? "1" : "0";
-            ini["Audio"]["LatencyBuffer"] = latencyBuffer.ToString();
-            ini["Audio"]["MaxOutputBufferSize"] = maxOutputBufferSize.ToString();
-            ini["Audio"]["Win32UltraLowLatencyMode"] = win32LowLatency ? "1" : "0";
-            ini.Sections.AddSection("Renderer.Win32");
-            ini["Renderer.Win32"]["Fullscreen"] = ((uint)fullscreenMode).ToString();
-            ini["Renderer.Win32"]["ScreenWidth"] = resolution.Width.ToString();
-            ini["Renderer.Win32"]["ScreenHeight"] = resolution.Height.ToString();
+		public void WriteConfig()
+		{
+			//create ini file
+			var ini = new IniData();
+			ini.Configuration.AssigmentSpacer = "";
+			ini.Sections.AddSection("Audio");
+			ini["Audio"]["EnableMicrophone"] = enableMicrophone ? "1" : "0";
+			ini["Audio"]["DumpAudioLog"] = dumpAudioLog ? "1" : "0";
+			ini["Audio"]["ExclusiveMode"] = exclusive ? "1" : "0";
+			ini["Audio"]["LatencyBuffer"] = latencyBuffer.ToString();
+			ini["Audio"]["MaxOutputBufferSize"] = maxOutputBufferSize.ToString();
+			ini["Audio"]["Win32UltraLowLatencyMode"] = win32LowLatency ? "1" : "0";
+			ini.Sections.AddSection("Renderer.Win32");
+			ini["Renderer.Win32"]["Fullscreen"] = ((uint)fullscreenMode).ToString();
+			ini["Renderer.Win32"]["ScreenWidth"] = resolution.Width.ToString();
+			ini["Renderer.Win32"]["ScreenHeight"] = resolution.Height.ToString();
 
-            //merge with existing ini if it exists
-            if (File.Exists(ConfigPath))
-            {
-                var existing = ConfigPath.TryReadIniFile();
-                existing.Merge(ini);
-                ini = existing;
-                ini.Configuration.AssigmentSpacer = "";
-            }
+			//merge with existing ini if it exists
+			if (File.Exists(ConfigPath))
+			{
+				var existing = ConfigPath.TryReadIniFile();
+				existing.Merge(ini);
+				ini = existing;
+				ini.Configuration.AssigmentSpacer = "";
+			}
 
-            //write to disk
-            var parser = new FileIniDataParser();
-            parser.WriteFile(ConfigPath, ini, Encoding.GetEncoding(1252));
-        }
+			//write to disk
+			var parser = new FileIniDataParser();
+			parser.WriteFile(ConfigPath, ini, Encoding.GetEncoding(1252));
+		}
 
 
-        /////////////////////////////////////////////////////////////////////
-        // HIGH FREQUENCY POLL WINDOW
-        /////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		// HIGH FREQUENCY POLL WINDOW
+		/////////////////////////////////////////////////////////////////////
 
-        public void SetFastPollWindow(double sec)
-        {
-            this.DisposeCheck();
-            if (process != null)
-                return;
-            highFrequencyPollMilliseconds = (int)Math.Min(Math.Max(sec,0.0) * 1000.0, 10000.0);
-        }
+		public void SetFastPollWindow(double sec)
+		{
+			this.DisposeCheck();
+			if (process != null)
+				return;
+			highFrequencyPollMilliseconds = (int)Math.Min(Math.Max(sec,0.0) * 1000.0, 10000.0);
+		}
 
-        /////////////////////////////////////////////////////////////////////
-        // DISPOSE
-        /////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		// DISPOSE
+		/////////////////////////////////////////////////////////////////////
 
-        public void Dispose()
-        {
-            disposed = true;
-            if (thread != null)
-                thread.Join();
-            GameProcess = null;
-            directoryWatcher.Dispose();
-            Running = null;
-            Terminated = null;
-            ConfigRead = null;
-        }
-    }
+		public void Dispose()
+		{
+			disposed = true;
+			if (thread != null)
+				thread.Join();
+			GameProcess = null;
+			directoryWatcher.Dispose();
+			Running = null;
+			Terminated = null;
+			ConfigRead = null;
+		}
+	}
 }
