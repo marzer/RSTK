@@ -28,10 +28,10 @@ namespace RSTK
 
         private static readonly List<String> DefaultGamePaths = new List<string>()
         {
-            @"C:\Program Files\Steam\steamapps\common\Rocksmith2014\Rocksmith2014.exe",
-            @"C:\Program Files (x86)\Steam\steamapps\common\Rocksmith2014\Rocksmith2014.exe",
-            @"C:\Games\SteamLibrary\steamapps\common\Rocksmith2014\Rocksmith2014.exe",
-            @"D:\Games\SteamLibrary\steamapps\common\Rocksmith2014\Rocksmith2014.exe"
+            @"<DRIVE>:\Program Files\Steam\steamapps\common\Rocksmith2014\Rocksmith2014.exe",
+            @"<DRIVE>:\Program Files (x86)\Steam\steamapps\common\Rocksmith2014\Rocksmith2014.exe",
+            @"<DRIVE>:\Games\SteamLibrary\steamapps\common\Rocksmith2014\Rocksmith2014.exe",
+            @"<DRIVE>:\SteamLibrary\steamapps\common\Rocksmith2014\Rocksmith2014.exe"
         };
 
         private static readonly List<Size> DefaultSupportedResolutions = new List<Size>
@@ -333,12 +333,16 @@ namespace RSTK
             //check rocksmith location presets
             if (!pathOK)
             {
-                foreach (var p in DefaultGamePaths)
+                for (var drive = 'C'; !pathOK && drive <= 'Z'; drive++)
                 {
-                    if (!File.Exists(p))
-                        continue;
-                    if (pathOK = SetRocksmithPath(Path.GetFullPath(p)))
-                        break;
+                    foreach (var p in DefaultGamePaths)
+                    {
+                        var pp = p.Replace("<DRIVE>", drive.ToString());
+                        if (!File.Exists(pp))
+                            continue;
+                        if (pathOK = SetRocksmithPath(Path.GetFullPath(pp)))
+                            break;
+                    }
                 }
 
             }
